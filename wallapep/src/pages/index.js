@@ -1,8 +1,7 @@
+import HomeContentComponent from "./components/home/HomeContentComponent.js";
 
 export default function Home() {
   return (
-    <h2>
-      Index
-    </h2>
+    <HomeContentComponent />
   );
 }

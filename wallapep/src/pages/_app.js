@@ -108,7 +108,7 @@ export default function App({ Component, pageProps }) {
                 <Col xs= {18} sm={19} md={20} lg={21} xl = {22}>
                 {!login &&
                     <Menu theme="dark" mode="horizontal" items={ [
-                        { key:"logo",  label: <img src="/logo.png" width="40" height="40" />},
+                        { key:"logo",  label: <Link href="/"><img src="/logo.png" width="40" height="40" /></Link>},
                         { key:"menuLogin",  icon: <LoginOutlined/>, label: <Link href="/login">Login</Link>},
                         { key:"menuRegister",  label: <Link href="/register">Register</Link>},
                     ]} >
@@ -116,10 +116,11 @@ export default function App({ Component, pageProps }) {
                 }
                 {login &&
                     <Menu theme="dark" mode="horizontal" items={ [
-                        { key:"logo",  label: <img src="/logo.png" width="40" height="40" />},
+                        { key:"logo",  label: <Link href="/"><img src="/logo.png" width="40" height="40" /></Link>},
                         { key:"menuProducts",  label: <Link href="/products">Products</Link>},
                         { key:"menuCreateProduct",  label: <Link href="/createProduct">Sell</Link>},
                         { key:"menuMyProduct", label: <Link href="/myProducts">My Products</Link> },
+                        { key:"menuMyTransactions", label: <Link href="/myTransactions">My Transactions</Link> },
                         { key:"menuDisonnect",  label: <Link href="#" 
                             onClick={ (e) => { disconnect(e)} } >Disconnect</Link>},
                     ]} >
@@ -141,7 +142,22 @@ export default function App({ Component, pageProps }) {
           <Content style={{ padding: "20px 50px" }}>
               <Component {...pageProps} setLogin={setLogin} openNotification={openNotification} />
           </Content>
-          <Footer style={{ textAlign: "center" }}> Wallapep </Footer>
+          <Footer 
+            style={{ 
+              backgroundColor: '#001529',
+              color: '#ffffff',
+              padding: '12px 16px',
+              textAlign: 'center'
+            }}
+          >
+            <Row justify="center">
+              <Col xs={24} sm={24} md={20} lg={16} xl={12}>
+                <Text type="secondary" style={{ color: '#9ca3af' }}>
+                  © {new Date().getFullYear()} Wallapep - All rights reserved
+                </Text>
+              </Col>
+            </Row>
+          </Footer>
       </Layout>
     </Provider>
   )

@@ -2,13 +2,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import {modifyStateProperty} from "../../../utils/UtilsState";
 import {Card, Col, Row, Form, Input, Button , Typography } from "antd";
-import {
-    validateFormDataInputRequired,
-    validateFormDataInputEmail,
-    allowSubmitForm,
-    setServerErrors,
-    joinAllServerErrorMessages
- } from "../../../utils/UtilsValidations"
+import {validateFormDataInputRequired,validateFormDataInputEmail,allowSubmitForm,setServerErrors,joinAllServerErrorMessages} from "../../../utils/UtilsValidations"
 
 let LoginFormComponent = ({setLogin, openNotification}) => {
     let router = useRouter()
@@ -53,7 +47,7 @@ let LoginFormComponent = ({setLogin, openNotification}) => {
         <Row align="middle" justify="center" style={{ minHeight: "70vh"}}>
             <Col xs={0} sm={0} md={12} lg={8} xl={6}  ><img src="/iniciar-sesion.png" width="100%"/></Col>
             <Col xs={24} sm={24} md={12} lg={12} xl={10} >
-                <Card title="Login" style={{ width: "100%"}} style={ {margin: "15px" }}>
+                <Card title="Login" style={{ width: "100%" ,margin: "15px" }}>
 
             {formErrors?.email?.msg &&
                     <Typography.Text type="danger"> {formErrors?.email?.msg} </Typography.Text>}

@@ -1,39 +1,84 @@
 import {useState, useEffect } from "react";
-import { Typography, Card, Descriptions, Image, Button  } from 'antd';
-import { ShoppingOutlined } from '@ant-design/icons';
+import Link from 'next/link';
+import { Typography, Card, Descriptions, Image, Button, Tag } from 'antd';
+import { ShoppingOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
+import { joinAllServerErrorMessages } from '../../../utils/UtilsValidations';
 
-let DetailsProductComponent  = ({id}) => {
+let DetailsProductComponent  = ({id, openNotification}) => {
     let [product, setProduct] = useState({})
+    let [canBuy, setCanBuy] = useState(true)
+    let [buyMessage, setBuyMessage] = useState("")
 
     useEffect(() => {
         getProduct(id);
     }, [])
 
+    let getUserIdFromApiKey = () => {
+        let apiKey = localStorage.getItem("apiKey");
+        if (!apiKey) return null;
+        
+        try {
+            let payload = apiKey.split('.')[1];
+            let decoded = JSON.parse(atob(payload));
+            return decoded.id;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    let checkIfCanBuy = () => {
+        let userId = getUserIdFromApiKey();
+        
+        if (!userId) {
+            setCanBuy(false);
+            setBuyMessage("You must be logged in to buy");
+            return;
+        }
+
+        if (product.buyerId != null) {
+            setCanBuy(false);
+            setBuyMessage("This product has already been sold");
+            return;
+        }
+
+        if (product.sellerId == userId) {
+            setCanBuy(false);
+            setBuyMessage("You cannot buy your own product");
+            return;
+        }
+
+        setCanBuy(true);
+        setBuyMessage("");
+    }
+
     let buyProduct = async () => {
         let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions/",
+            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions",
             {
                 method: "POST",
                 headers: {
-                    "Content-Type" : "application/json ",
+                    "Content-Type" : "application/json",
                     "apikey": localStorage.getItem("apiKey")
                 },
                 body: JSON.stringify({
-                    productId: id
+                    productId: id,
+                    buyerPaymentId: null
                 })
             });
 
         if ( response.ok ){
             let jsonData = await response.json();
-            if (jsonData.affectedRows == 1){
-
+            if (openNotification) {
+                openNotification("top", "Transaction registered successfully", "success");
             }
+            getProduct(id);
         } else {
             let responseBody = await response.json();
             let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
+            let notificationMsg = joinAllServerErrorMessages(serverErrors);
+            if (openNotification) {
+                openNotification("top", notificationMsg, "error");
+            }
         }
     }
 
@@ -50,7 +95,8 @@ let DetailsProductComponent  = ({id}) => {
 
         if ( response.ok ){
             let jsonData = await response.json();
-            setProduct(jsonData)
+            setProduct(jsonData);
+            checkIfCanBuy();
         } else {
             let responseBody = await response.json();
             let serverErrors = responseBody.errors;
@@ -60,10 +106,16 @@ let DetailsProductComponent  = ({id}) => {
         }
     }
 
+    useEffect(() => {
+        if (product.id) {
+            checkIfCanBuy();
+        }
+    }, [product])
+
     const { Text } = Typography;
-    let labelProductPrice = "No-Oferta"
+    let labelProductPrice = "No-Offer"
     if ( product.price < 10000){
-        labelProductPrice="Oferta"
+        labelProductPrice="Offer"
     }
 
 
@@ -77,14 +129,33 @@ let DetailsProductComponent  = ({id}) => {
             <Descriptions.Item label="Description">
                 { product.description }
             </Descriptions.Item>
+            <Descriptions.Item label="Seller">
+                {product.sellerId ? (
+                    <Link href={`user/${product.sellerId}`}>
+                        View Seller Profile
+                    </Link>
+                ) : '-'}
+            </Descriptions.Item>
             <Descriptions.Item >
-                <Text strong underline style={{ fontSize:20 }}>{ product.price }</Text>
+                <Text strong underline style={{ fontSize:20 }}>€{ product.price }</Text>
                 { labelProductPrice }
             </Descriptions.Item>
+            {!canBuy && buyMessage && (
                 <Descriptions.Item>
-                <Button type="primary" onClick={buyProduct}
-                        icon={<ShoppingOutlined/>} size="large">
-                    Buy
+                    <Tag color="orange" icon={<StopOutlined />}>
+                        {buyMessage}
+                    </Tag>
+                </Descriptions.Item>
+            )}
+            <Descriptions.Item>
+                <Button 
+                    type="primary" 
+                    onClick={buyProduct}
+                    icon={<ShoppingOutlined/>} 
+                    size="large"
+                    disabled={!canBuy}
+                >
+                    {canBuy ? "Buy" : "Not available"}
                 </Button>
             </Descriptions.Item>
 

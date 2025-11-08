@@ -1,13 +1,13 @@
 import { useRouter } from "next/router";
 import DetailsProductComponent from "../components/products/DetailsProductComponent";
 
-export default function DetailsProductPage() {
+export default function DetailsProductPage({ openNotification }) {
   const router = useRouter();
   const { id } = router.query; 
 
   return (
     <div>
-      <DetailsProductComponent id = {id}/>
+      <DetailsProductComponent id={id} openNotification={openNotification} />
     </div>
   );
 }

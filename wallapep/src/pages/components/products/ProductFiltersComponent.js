@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
-import { Card, Input, Select, InputNumber, Form, Space } from 'antd';
+import { Card, Input, Select, InputNumber, Form, Space, Button } from 'antd';
+import { ClearOutlined } from '@ant-design/icons';
 import { categoryLabels } from '../../../utils/UtilsCategories';
 import { modifyStateProperty } from '../../../utils/UtilsState';
+import styles from '../../../styles/ProductFilters.module.css';
 
 const { Option } = Select;
 
-let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProducts }) => {
+let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProducts, userProductIds }) => {
   let categoryOptions = Object.keys(categoryLabels).map(key => ({
     value: key,
     label: categoryLabels[key].label
@@ -13,6 +15,16 @@ let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProdu
 
   useEffect(() => {
     let filtered = products.filter((product) => {
+      // Exclude sold products - use buyerEmail from product
+      if (product.buyerEmail && product.buyerEmail !== '' && product.buyerEmail != null) {
+        return false;
+      }
+
+      // Exclude products owned by current user - check if product ID is in user's products
+      if (userProductIds.length > 0 && userProductIds.includes(product.id)) {
+        return false;
+      }
+
       // Filter by category
       if (filters.category !== 'todos' && product.category !== filters.category) {
         return false;
@@ -37,18 +49,33 @@ let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProdu
     });
 
     setFilteredProducts(filtered);
-  }, [products, filters, setFilteredProducts]);
+  }, [products, filters, setFilteredProducts, userProductIds]);
+
+  let clearAllFilters = () => {
+    setFilters({
+      category: 'todos',
+      title: '',
+      minPrice: null,
+      maxPrice: null
+    });
+  };
+
+  let hasActiveFilters = filters.category !== 'todos' || filters.title || filters.minPrice !== null || filters.maxPrice !== null;
 
   return (
-    <Card style={{ marginBottom: '24px' }}>
-      <Form layout="inline" style={{ width: '100%', justifyContent: 'space-between' }}>
-        <Space wrap style={{ width: '100%' }}>
+    <Card className={styles.filtersCard}>
+      <Form layout="inline" className={styles.filtersForm}>
+        <Space wrap className={styles.filtersSpace}>
+          
           <Form.Item label="Category">
             <Select
-              style={{ width: 150 }}
+              className={styles.categorySelect}
               value={filters.category}
               onChange={(value) => modifyStateProperty(filters, setFilters, 'category', value)}
               placeholder="All categories"
+              popupMatchSelectWidth={false}
+              dropdownStyle={{ minWidth: 200, maxHeight: 300 }}
+              classNames={{ popup: { root: 'categoryDropdown' } }}
             >
               {categoryOptions.map(option => (
                 <Option key={option.value} value={option.value}>
@@ -60,7 +87,7 @@ let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProdu
 
           <Form.Item label="Title">
             <Input
-              style={{ width: 200 }}
+              className={styles.titleInput}
               placeholder="Search by title..."
               value={filters.title}
               onChange={(e) => modifyStateProperty(filters, setFilters, 'title', e.target.value)}
@@ -70,7 +97,7 @@ let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProdu
 
           <Form.Item label="Min Price">
             <InputNumber
-              style={{ width: 120 }}
+              className={styles.priceInput}
               placeholder="Min"
               min={0}
               value={filters.minPrice}
@@ -82,7 +109,7 @@ let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProdu
 
           <Form.Item label="Max Price">
             <InputNumber
-              style={{ width: 120 }}
+              className={styles.priceInput}
               placeholder="Max"
               min={0}
               value={filters.maxPrice}
@@ -91,6 +118,18 @@ let ProductFiltersComponent = ({ products, filters, setFilters, setFilteredProdu
               parser={value => value.replace('€ ', '')}
             />
           </Form.Item>
+
+          {hasActiveFilters && (
+            <Form.Item>
+              <Button 
+                icon={<ClearOutlined />} 
+                onClick={clearAllFilters}
+                type="default"
+              >
+                Clear Filters
+              </Button>
+            </Form.Item>
+          )}
         </Space>
       </Form>
     </Card>

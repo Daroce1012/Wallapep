@@ -1,0 +1,18 @@
+.filterDropdown {
+  padding: 8px;
+}
+
+.filterInput {
+  margin-bottom: 8px;
+  display: block;
+}
+
+.filterButton {
+  width: 90px;
+}
+
+.priceText {
+  color: #1890ff;
+  font-size: 16px;
+}
+

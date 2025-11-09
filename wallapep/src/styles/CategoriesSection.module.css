@@ -1,0 +1,30 @@
+.container {
+  margin-bottom: 32px;
+}
+
+.categoryCard {
+  text-align: center;
+}
+
+.categoryCardSelected {
+  text-align: center;
+  border: 2px solid #1890ff;
+}
+
+.emoji {
+  font-size: 2em;
+  margin-bottom: 12px;
+}
+
+.label {
+  margin-bottom: 8px;
+}
+
+.labelText {
+  display: block;
+}
+
+.tag {
+  margin-top: 4px;
+}
+

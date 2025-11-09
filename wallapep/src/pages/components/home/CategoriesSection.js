@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, Col, Row, Typography, Tag } from 'antd';
 import { categoryLabels } from '../../../utils/UtilsCategories';
+import { apiGet } from '../../../utils/UtilsApi';
+import styles from '../../../styles/CategoriesSection.module.css';
 
 const { Title, Text } = Typography;
 
@@ -13,18 +15,8 @@ let CategoriesSection = ({ selectedCategory, setSelectedCategory, isUserLoggedIn
 
   let loadCategoriesCount = async () => {
     try {
-      let response = await fetch(
-        process.env.NEXT_PUBLIC_BACKEND_BASE_URL + "/products/categories/count",
-        {
-          method: "GET",
-          headers: {
-            apikey: localStorage.getItem("apiKey") || "",
-          },
-        }
-      );
-
-      if (response.ok) {
-        let jsonData = await response.json();
+      let jsonData = await apiGet("/products/categories/count");
+      if (jsonData) {
         setCategoriesCount(jsonData);
       }
     } catch (error) {
@@ -46,7 +38,7 @@ let CategoriesSection = ({ selectedCategory, setSelectedCategory, isUserLoggedIn
   };
 
   return (
-    <div style={{ marginBottom: '32px' }}>
+    <div className={styles.container}>
       <Title level={2}>Categories</Title>
       <Row gutter={[16, 16]}>
         {Object.keys(categoryLabels).map((categoryKey) => {
@@ -59,20 +51,17 @@ let CategoriesSection = ({ selectedCategory, setSelectedCategory, isUserLoggedIn
               <Card
                 hoverable
                 onClick={() => setSelectedCategory(categoryKey)}
-                style={{
-                  textAlign: 'center',
-                  border: isSelected ? '2px solid #1890ff' : undefined,
-                }}
+                className={isSelected ? styles.categoryCardSelected : styles.categoryCard}
               >
-                <div style={{ fontSize: '2em', marginBottom: '12px' }}>
+                <div className={styles.emoji}>
                   {categoryInfo.emoji}
                 </div>
-                <div style={{ marginBottom: '8px' }}>
-                  <Text strong style={{ display: 'block' }}>
+                <div className={styles.label}>
+                  <Text strong className={styles.labelText}>
                     {categoryInfo.label}
                   </Text>
                 </div>
-                <Tag color="blue" style={{ marginTop: '4px' }}>
+                <Tag color="blue" className={styles.tag}>
                   {count} products
                 </Tag>
               </Card>

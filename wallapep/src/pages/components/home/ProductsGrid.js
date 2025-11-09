@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { Card, Col, Row, Typography, Tag, Button, Space, Flex } from 'antd';
 import { StarOutlined } from '@ant-design/icons';
 import { categoryLabels } from '../../../utils/UtilsCategories';
+import styles from '../../../styles/ProductsGrid.module.css';
 
 const { Title, Paragraph, Text } = Typography;
 
 let ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
+  
   let getFilteredProducts = () => {
     if (!isUserLoggedIn) {
       return [];
@@ -24,8 +26,8 @@ let ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
 
   return (
     <div>
-      <Flex justify="space-between" align="center" style={{ marginBottom: '24px' }}>
-        <Title level={2} style={{ margin: 0 }}>
+      <Flex justify="space-between" align="center" className={styles.header}>
+        <Title level={2} className={styles.title}>
           {selectedCategory === 'todos'? 'All Products': categoryLabels[selectedCategory]?.label}
         </Title>
         <Tag color="blue">
@@ -34,7 +36,7 @@ let ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
       </Flex>
 
       {filteredProducts.length === 0 
-        ? (<Flex justify="center" align="middle" style={{ padding: '60px 0' }}>
+        ? (<Flex justify="center" align="middle" className={styles.emptyState}>
             <Paragraph type="secondary">  No products available in this category.</Paragraph>
           </Flex>) 
         : (
@@ -45,11 +47,11 @@ let ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
                 <Card
                   hoverable
                   cover={
-                    <Flex justify="center" align="middle" style={{ height: '200px', background: '#f0f2f5' }}>
+                    <Flex justify="center" align="middle" className={styles.imageContainer}>
                       <img
                         src={product.image}
                         alt={product.title}
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                        className={styles.productImage}
                       />
                     </Flex>
                   }
@@ -63,13 +65,13 @@ let ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
                     description={
                       <div>
                         <Space>
-                          <StarOutlined style={{ color: '#faad14' }} />
+                          <StarOutlined className={styles.starIcon} />
                           <Text type="secondary">
                             {product.description ? product.description.substring(0, 40) + '...' : ''}
                           </Text>
                         </Space>
-                        <Flex justify="space-between" align="center" style={{ marginTop: '12px' }}>
-                          <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
+                        <Flex justify="space-between" align="center" className={styles.priceRow}>
+                          <Title level={4} className={styles.productPrice}>
                             €{product.price}
                           </Title>
                           <Button type="primary" size="small">View Details</Button>

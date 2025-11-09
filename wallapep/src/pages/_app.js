@@ -1,13 +1,16 @@
 import "@/styles/globals.css";
 import Link from "next/link";
 import 'antd/dist/reset.css';
-import { Layout, Menu, Avatar, Typography, Col, Row, notification } from 'antd';
-import { FireOutlined , LoginOutlined } from '@ant-design/icons';
+import { Layout, Menu, Avatar, Typography, Col, Row, notification, Breadcrumb } from 'antd';
+import { FireOutlined , LoginOutlined, HomeOutlined, ShoppingOutlined, PlusOutlined, AppstoreOutlined, TransactionOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 import { Provider } from "react-redux";
 import store from "../reducers/store"
+import { apiGet } from '../utils/UtilsApi';
+import styles from '../styles/App.module.css';
+import Head from "next/head";
 
 const { Text } = Typography;
 
@@ -41,19 +44,9 @@ export default function App({ Component, pageProps }) {
             return;
         }
 
-        let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL + "/users/isActiveApiKey",
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                }
-            });
-
-        if (response.ok) {
-            let jsonData = await response.json();
+        let jsonData = await apiGet("/users/isActiveApiKey");
+        if (jsonData) {
             setLogin(jsonData.activeApiKey)
-
             if (!jsonData.activeApiKey){
                 router.push("/login")
             }
@@ -68,15 +61,7 @@ export default function App({ Component, pageProps }) {
 
     let disconnect = async (e) => {
         e.preventDefault();
-        let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL +"/users/disconnect",
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                }
-            });
-
+        await apiGet("/users/disconnect");
         localStorage.removeItem("apiKey");
         setLogin(false)
         router.push("/login")
@@ -101,7 +86,10 @@ export default function App({ Component, pageProps }) {
 
   return (
     <Provider store={store}>
-      <Layout className="layout" style={{ minHeight: "100vh" }}>
+      <Head>
+        <title>Wallapep - Buy and Sell Products</title>
+      </Head>
+      <Layout className={styles.layout}>
         {contextHolder}
           <Header>
             <Row>
@@ -117,42 +105,49 @@ export default function App({ Component, pageProps }) {
                 {login &&
                     <Menu theme="dark" mode="horizontal" items={ [
                         { key:"logo",  label: <Link href="/"><img src="/logo.png" width="40" height="40" /></Link>},
-                        { key:"menuProducts",  label: <Link href="/products">Products</Link>},
-                        { key:"menuCreateProduct",  label: <Link href="/createProduct">Sell</Link>},
-                        { key:"menuMyProduct", label: <Link href="/myProducts">My Products</Link> },
-                        { key:"menuMyTransactions", label: <Link href="/myTransactions">My Transactions</Link> },
-                        { key:"menuDisonnect",  label: <Link href="#" 
+                        { key:"menuProducts",  icon: <ShoppingOutlined />, label: <Link href="/products">Products</Link>},
+                        { key:"menuCreateProduct",  icon: <PlusOutlined />, label: <Link href="/createProduct">Sell</Link>},
+                        { key:"menuMyProduct", icon: <AppstoreOutlined />, label: <Link href="/myProducts">My Products</Link> },
+                        { key:"menuMyTransactions", icon: <TransactionOutlined />, label: <Link href="/myTransactions">My Transactions</Link> },
+                        { key:"menuDisonnect",  icon: <LogoutOutlined />, label: <Link href="#" 
                             onClick={ (e) => { disconnect(e)} } >Disconnect</Link>},
                     ]} >
                     </Menu>
                 }
                 </Col>
-                <Col xs= {6} sm={5} md = {4}  lg = {3} xl = {2} style={{display: 'flex', flexDirection: 'row-reverse' }} >
+                <Col xs= {6} sm={5} md = {4}  lg = {3} xl = {2} className={styles.userCol}>
                     { login ? (
-                        <Avatar size="large" 
-                                style={{ backgroundColor: "#ff0000", verticalAlign: 'middle', marginTop: 12   }}>
+                        <Avatar size="large" className={styles.userInfo}>
                             { charUser }
                         </Avatar>
                     ) : (
-                        <Link href ="/login"> <Text style={{ color:"#ffffff" }}>Login</Text></Link>
+                        <Link href ="/login"> <Text className={styles.loginText}>Login</Text></Link>
                     )}
                 </Col>
             </Row>
           </Header>
-          <Content style={{ padding: "20px 50px" }}>
+          <Content className={styles.content}>
+              <Breadcrumb 
+                className={styles.breadcrumb}
+                items={[
+                  {
+                    title: (
+                      <Link href="/">
+                        <HomeOutlined /> Home
+                      </Link>
+                    ),
+                  },
+                  ...(pathname && pathname !== '/' && pathname.length > 1 ? [{
+                    title: pathname.charAt(1).toUpperCase() + pathname.slice(2).replace(/([A-Z])/g, ' $1').trim()
+                  }] : [])
+                ]}
+              />
               <Component {...pageProps} setLogin={setLogin} openNotification={openNotification} />
           </Content>
-          <Footer 
-            style={{ 
-              backgroundColor: '#001529',
-              color: '#ffffff',
-              padding: '12px 16px',
-              textAlign: 'center'
-            }}
-          >
+          <Footer className={styles.footer}>
             <Row justify="center">
               <Col xs={24} sm={24} md={20} lg={16} xl={12}>
-                <Text type="secondary" style={{ color: '#9ca3af' }}>
+                <Text type="secondary" className={styles.footerText}>
                   © {new Date().getFullYear()} Wallapep - All rights reserved
                 </Text>
               </Col>

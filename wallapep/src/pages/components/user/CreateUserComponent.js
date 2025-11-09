@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { modifyStateProperty} from "../../../utils/UtilsState";
-import { Card, Input, Button, Row, Col, Form, Typography, DatePicker } from "antd";
+import { Card, Input, Button, Row, Col, Form, Typography, DatePicker, Select, Space } from "antd";
 import {validateFormDataInputRequired,validateFormDataInputEmail,allowSubmitForm,setServerErrors,joinAllServerErrorMessages} from "../../../utils/UtilsValidations"
+import { countries } from "../../../utils/UtilsCountries";
 import dayjs from "dayjs";
+import { apiPost } from '../../../utils/UtilsApi';
+import styles from '../../../styles/CreateUser.module.css';
+
+const { Option } = Select;
 
 
 let CreateUserComponent = ({ openNotification }) => {
@@ -24,40 +29,34 @@ let CreateUserComponent = ({ openNotification }) => {
     });
 
     let clickCreate = async () => {
-        let response = await fetch(process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/users", {
-            method: "POST",
-            headers: { "Content-Type" : "application/json "},
-            body: JSON.stringify(formData)
-        })
+        let result = await apiPost("/users", formData, {
+            includeApiKey: false, // No requiere API key para crear usuario
+            onError: (serverErrors) => {
+                setServerErrors(serverErrors, setFormErrors)
+                let notificationMsg = joinAllServerErrorMessages(serverErrors)
+                if (openNotification) {
+                    openNotification("top", notificationMsg, "error");
+                }
+            }
+        });
 
-        if (response.ok){
-            let responseBody = await response.json();
-            console.log("ok "+responseBody)
+        if (result) {
             if (openNotification) {
                 openNotification("top", "User created successfully", "success");
-            }
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-
-            setServerErrors(serverErrors, setFormErrors)
-            let notificationMsg = joinAllServerErrorMessages(serverErrors)
-            if (openNotification) {
-                openNotification("top", notificationMsg, "error");
             }
         }
     }
 
 
    return (
-        <Row align="middle" justify="center" style={{ minHeight: "80vh" }}>
+        <Row align="middle" justify="center" className={styles.container}>
         
           {/* <Col xs={0} sm={0} md={12} lg={8} xl={6}>
             <img src="/create-user.png" width="100%" alt="Create User" />
           </Col>
        */}
           <Col xs={24} sm={24} md={12} lg={12} xl={10}>
-            <Card title="Create User" style={{ width: "100%", margin: "15px" }}>
+            <Card title="Create User" className={styles.card}>
               
               {formErrors?.email?.msg && (
                 <Typography.Text type="danger">{formErrors?.email?.msg}</Typography.Text>
@@ -136,13 +135,53 @@ let CreateUserComponent = ({ openNotification }) => {
               </Form.Item>
       
               <Form.Item label="" name="country">
-                <Input
-                  placeholder="Enter your country"
+                <Select
+                  showSearch
+                  placeholder="Select your country"
+                  optionFilterProp="label"
+                  filterOption={(input, option) => {
+                    let countryName = option.value || '';
+                    return countryName.toLowerCase().includes(input.toLowerCase());
+                  }}
                   value={formData.country}
-                  onChange={(i) =>
-                    modifyStateProperty(formData, setFormData, "country", i.currentTarget.value)
+                  onChange={(value) =>
+                    modifyStateProperty(formData, setFormData, "country", value)
                   }
-                />
+                  allowClear
+                  optionLabelProp="label"
+                >
+                  {countries.map((country) => (
+                    <Option 
+                      key={country.code} 
+                      value={country.name}
+                      label={
+                        <Space>
+                          <img 
+                            src={country.flagImage} 
+                            alt={country.name}
+                            className={styles.flagImage}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                          <span>{country.name}</span>
+                        </Space>
+                      }
+                    >
+                      <Space>
+                        <img 
+                          src={country.flagImage} 
+                          alt={country.name}
+                          className={styles.flagImage}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        <span>{country.name}</span>
+                      </Space>
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
 
               <Form.Item label="" name="address">
@@ -169,15 +208,18 @@ let CreateUserComponent = ({ openNotification }) => {
                 <DatePicker
                   placeholder="Select your birthday"
                   format="DD/MM/YYYY"
-                  value={formData.birthday ? dayjs(formData.birthday * 1000) : null} // convertir de segundos a dayjs
+                  value={formData.birthday ? dayjs(formData.birthday * 1000) : null}
                   onChange={(date) => {
-                    const timestampInSeconds = date ? Math.floor(date.valueOf() / 1000) : ''; // divide entre 1000
+                    const timestampInSeconds = date ? Math.floor(date.valueOf() / 1000) : '';
                     console.log(timestampInSeconds)
                     modifyStateProperty(formData, setFormData, "birthday", timestampInSeconds);
                   }}
+                  disabledDate={(current) => {
+                    return current && current > dayjs().endOf('day');
+                  }}
                 />
-                <Typography.Text type="secondary" style={{ fontSize: "12px", display: "block", marginTop: "4px" }}>
-                  Ejemplo: 01/01/1990 (DD/MM/YYYY)
+                <Typography.Text type="secondary" className={styles.helperText}>
+                  Example: 01/01/1990 (DD/MM/YYYY)
                 </Typography.Text>
               </Form.Item>
       

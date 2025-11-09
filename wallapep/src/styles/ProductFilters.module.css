@@ -1,0 +1,25 @@
+.filtersCard {
+  margin-bottom: 24px;
+}
+
+.filtersForm {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.filtersSpace {
+  width: 100%;
+}
+
+.categorySelect {
+  width: 150px;
+}
+
+.titleInput {
+  width: 200px;
+}
+
+.priceInput {
+  width: 120px;
+}
+

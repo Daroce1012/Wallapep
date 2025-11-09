@@ -1,0 +1,21 @@
+.container {
+  min-height: 70vh;
+}
+
+.card {
+  width: 500px;
+}
+
+.headerIcon {
+  font-size: 20px;
+  color: #1890ff;
+}
+
+.uploadButton {
+  width: 100%;
+}
+
+.priceInput {
+  width: 100%;
+}
+

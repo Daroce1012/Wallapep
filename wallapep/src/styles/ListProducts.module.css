@@ -1,0 +1,44 @@
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.headerIcon {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.headerTitle {
+  margin: 0;
+}
+
+.resultsTag {
+  margin-bottom: 16px;
+}
+
+.resultsTagContent {
+  font-size: 14px;
+  padding: 4px 12px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px;
+}
+
+.productImage {
+  height: 200px;
+  object-fit: cover;
+}
+
+.productLink {
+  text-decoration: none;
+}
+
+.productPrice {
+  margin: 0;
+  color: #1890ff;
+  font-weight: bold;
+}
+

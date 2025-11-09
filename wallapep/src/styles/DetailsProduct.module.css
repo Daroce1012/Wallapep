@@ -1,0 +1,13 @@
+.productImage {
+  margin-bottom: 16px;
+}
+
+.description {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.price {
+  font-size: 20px;
+}
+

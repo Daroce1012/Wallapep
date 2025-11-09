@@ -1,30 +1,23 @@
 import {useState, useEffect } from "react";
 import Link from 'next/link';
-import { Typography, Card, Descriptions, Image, Button, Tag } from 'antd';
-import { ShoppingOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
+import { Typography, Card, Descriptions, Image, Button, Tag, Avatar, Space } from 'antd';
+import { ShoppingOutlined, StopOutlined, UserOutlined, StarOutlined } from '@ant-design/icons';
 import { joinAllServerErrorMessages } from '../../../utils/UtilsValidations';
+import { getUserIdFromApiKey } from '../../../utils/UtilsUser';
+import { apiGet, apiPost } from '../../../utils/UtilsApi';
+import { processProductImage } from '../../../utils/UtilsProducts';
+import styles from '../../../styles/DetailsProduct.module.css';
 
 let DetailsProductComponent  = ({id, openNotification}) => {
     let [product, setProduct] = useState({})
     let [canBuy, setCanBuy] = useState(true)
     let [buyMessage, setBuyMessage] = useState("")
+    let [sellerName, setSellerName] = useState(null)
+    let [sellerReputation, setSellerReputation] = useState(null)
 
     useEffect(() => {
         getProduct(id);
     }, [])
-
-    let getUserIdFromApiKey = () => {
-        let apiKey = localStorage.getItem("apiKey");
-        if (!apiKey) return null;
-        
-        try {
-            let payload = apiKey.split('.')[1];
-            let decoded = JSON.parse(atob(payload));
-            return decoded.id;
-        } catch (error) {
-            return null;
-        }
-    }
 
     let checkIfCanBuy = () => {
         let userId = getUserIdFromApiKey();
@@ -52,57 +45,75 @@ let DetailsProductComponent  = ({id, openNotification}) => {
     }
 
     let buyProduct = async () => {
-        let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type" : "application/json",
-                    "apikey": localStorage.getItem("apiKey")
-                },
-                body: JSON.stringify({
-                    productId: id,
-                    buyerPaymentId: null
-                })
-            });
+        let result = await apiPost("/transactions", {
+            productId: id,
+            buyerPaymentId: null
+        }, {
+            onError: (serverErrors) => {
+                let notificationMsg = joinAllServerErrorMessages(serverErrors);
+                if (openNotification) {
+                    openNotification("top", notificationMsg, "error");
+                }
+            }
+        });
 
-        if ( response.ok ){
-            let jsonData = await response.json();
+        if (result) {
             if (openNotification) {
                 openNotification("top", "Transaction registered successfully", "success");
             }
             getProduct(id);
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            let notificationMsg = joinAllServerErrorMessages(serverErrors);
-            if (openNotification) {
-                openNotification("top", notificationMsg, "error");
-            }
         }
     }
 
 
-    let getProduct = async (id) => {
-         let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/products/"+id,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            });
+    let loadSellerInfo = async (sellerId) => {
+        if (!sellerId) return;
+        
+        let userData = await apiGet(`/users/${sellerId}`);
+        if (userData) {
+            setSellerName(userData.name || null);
+        }
+    }
 
-        if ( response.ok ){
-            let jsonData = await response.json();
-            setProduct(jsonData);
+    let loadSellerReputation = async (sellerId) => {
+        if (!sellerId) return;
+        
+        try {
+            let [sales, purchases] = await Promise.all([
+                apiGet("/transactions/public", { params: { sellerId } }),
+                apiGet("/transactions/public", { params: { buyerId: sellerId } })
+            ]);
+
+            sales = sales || [];
+            purchases = purchases || [];
+
+            // Remove duplicates
+            let allTransactions = [...sales, ...purchases];
+            let uniqueTransactions = allTransactions.filter((transaction, index, self) =>
+                index === self.findIndex(t => t.id === transaction.id)
+            );
+
+            setSellerReputation({
+                totalTransactions: uniqueTransactions.length,
+                sales: sales.length,
+                purchases: purchases.length
+            });
+        } catch (error) {
+            console.error("Error loading seller reputation:", error);
+        }
+    }
+
+    let getProduct = async (id) => {
+        let jsonData = await apiGet(`/products/${id}`);
+        
+        if (jsonData) {
+            let productWithImage = await processProductImage(jsonData);
+            setProduct(productWithImage);
             checkIfCanBuy();
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
+            if (productWithImage.sellerId) {
+                loadSellerInfo(productWithImage.sellerId);
+                loadSellerReputation(productWithImage.sellerId);
+            }
         }
     }
 
@@ -113,32 +124,46 @@ let DetailsProductComponent  = ({id, openNotification}) => {
     }, [product])
 
     const { Text } = Typography;
-    let labelProductPrice = "No-Offer"
-    if ( product.price < 10000){
-        labelProductPrice="Offer"
-    }
-
 
     return (
     <Card>
-        <Image src="/item1.png" />
-        <Descriptions title={ product.title }>
+        {product.image && <Image src={product.image} alt={product.title} className={styles.productImage} />}
+        <Descriptions title={ product.title } column={1}>
             <Descriptions.Item label="Id">
                 { product.id }
             </Descriptions.Item>
-            <Descriptions.Item label="Description">
-                { product.description }
+            <Descriptions.Item label="Description" span={3}>
+                <Text className={styles.description}>
+                    { product.description || '-' }
+                </Text>
             </Descriptions.Item>
             <Descriptions.Item label="Seller">
                 {product.sellerId ? (
-                    <Link href={`user/${product.sellerId}`}>
-                        View Seller Profile
-                    </Link>
+                    <Space>
+                        <Avatar size="small" icon={<UserOutlined />} />
+                        <Link href={`user/${product.sellerId}`}>
+                            {sellerName || `User #${product.sellerId}`}
+                        </Link>
+                    </Space>
                 ) : '-'}
             </Descriptions.Item>
+            {sellerReputation && (
+                <Descriptions.Item label="Seller Reputation">
+                    <Space>
+                        <Tag color="gold" icon={<StarOutlined />}>
+                            {sellerReputation.totalTransactions} transactions
+                        </Tag>
+                        <Tag color="green">
+                            {sellerReputation.sales} sales
+                        </Tag>
+                        <Tag color="blue">
+                            {sellerReputation.purchases} purchases
+                        </Tag>
+                    </Space>
+                </Descriptions.Item>
+            )}
             <Descriptions.Item >
-                <Text strong underline style={{ fontSize:20 }}>€{ product.price }</Text>
-                { labelProductPrice }
+                <Text strong underline className={styles.price}>€ { product.price }</Text>
             </Descriptions.Item>
             {!canBuy && buyMessage && (
                 <Descriptions.Item>

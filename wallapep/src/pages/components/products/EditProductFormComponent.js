@@ -2,6 +2,8 @@ import {useState, useEffect } from "react";
 import { Card, Input, Button, Row, Col, Form, Typography, DatePicker } from "antd";
 import {modifyStateProperty} from "../../../utils/UtilsState";
 import {timestampToDate, dateFormatTemplate } from "../../../utils/UtilsDates";
+import { apiGet, apiPut } from '../../../utils/UtilsApi';
+import styles from '../../../styles/EditProductForm.module.css';
 
 let EditProductFormComponent = ({id}) => {
     let [formData, setFormData] = useState({})
@@ -11,56 +13,22 @@ let EditProductFormComponent = ({id}) => {
     }, [])
 
     let getProduct = async (id) => {
-         let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/products/"+id,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            });
-
-        if ( response.ok ){
-            let jsonData = await response.json();
+        let jsonData = await apiGet(`/products/${id}`);
+        if (jsonData) {
             setFormData(jsonData)
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
         }
     }
 
     let clickEditProduct = async () => {
-        let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/products/"+id,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type" : "application/json ",
-                    "apikey": localStorage.getItem("apiKey")
-                },
-                body: JSON.stringify(formData)
-            });
-
-        if ( response.ok ){
-            let jsonData = await response.json();
-            
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
-        }
+        let result = await apiPut(`/products/${id}`, formData);
+        // Result puede ser usado para mostrar mensaje de éxito si es necesario
     }
 
 
     return (
-        <Row align="middle" justify="center" style={{ minHeight: "70vh"}}>
+        <Row align="middle" justify="center" className={styles.container}>
             <Col>
-                <Card title="Edit product" style={{ width: "500px"}}>
+                <Card title="Edit product" className={styles.card}>
 
                     <Form.Item label="">
                         <Input onChange = { 

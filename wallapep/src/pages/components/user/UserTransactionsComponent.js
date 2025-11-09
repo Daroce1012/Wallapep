@@ -1,6 +1,8 @@
 import {useState, useEffect } from "react";
-import { Table, Tag, Typography, Spin } from 'antd';
+import { Table, Tag, Typography, Spin, Input, Button, Space } from 'antd';
 import Link from "next/link";
+import { apiGet } from '../../../utils/UtilsApi';
+import styles from '../../../styles/UserTransactions.module.css';
 
 const { Text } = Typography;
 
@@ -17,35 +19,14 @@ let UserTransactionsComponent = ({userId}) => {
     let loadTransactions = async () => {
         setLoading(true);
         try {
-            let sellerResponse = await fetch(
-                process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions/public?sellerId="+userId,
-                {
-                    method: "GET",
-                    headers: {
-                        "apikey": localStorage.getItem("apiKey") || ""
-                    },
-                });
-
-            let buyerResponse = await fetch(
-                process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions/public?buyerId="+userId,
-                {
-                    method: "GET",
-                    headers: {
-                        "apikey": localStorage.getItem("apiKey") || ""
-                    },
-                });
+            let [sales, purchases] = await Promise.all([
+                apiGet("/transactions/public", { params: { sellerId: userId } }),
+                apiGet("/transactions/public", { params: { buyerId: userId } })
+            ]);
 
             let allTransactions = [];
-
-            if (sellerResponse.ok) {
-                let sellerData = await sellerResponse.json();
-                allTransactions = [...allTransactions, ...sellerData];
-            }
-
-            if (buyerResponse.ok) {
-                let buyerData = await buyerResponse.json();
-                allTransactions = [...allTransactions, ...buyerData];
-            }
+            if (sales) allTransactions = [...allTransactions, ...sales];
+            if (purchases) allTransactions = [...allTransactions, ...purchases];
 
             // Remove duplicates based on transaction id
             let uniqueTransactions = allTransactions.filter((transaction, index, self) =>
@@ -69,6 +50,37 @@ let UserTransactionsComponent = ({userId}) => {
             title: "Product",
             dataIndex: "title",
             key: "title",
+            sorter: (a, b) => {
+                let titleA = a.title || '';
+                let titleB = b.title || '';
+                return titleA.localeCompare(titleB);
+            },
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div className={styles.filterDropdown}>
+                    <Input
+                        placeholder="Search product"
+                        value={selectedKeys[0]}
+                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        className={styles.filterInput}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            size="small"
+                            className={styles.filterButton}
+                        >
+                            Search
+                        </Button>
+                        <Button onClick={() => clearFilters()} size="small" className={styles.filterButton}>
+                            Reset
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) =>
+                record.title && record.title.toLowerCase().includes(value.toLowerCase()),
             render: (title, record) => (
                 <Link href={`detailProduct/${record.productId}`}>
                     {title || `Product #${record.productId}`}
@@ -78,6 +90,15 @@ let UserTransactionsComponent = ({userId}) => {
         {
             title: "Role",
             key: "role",
+            filters: [
+                { text: 'Seller', value: 'seller' },
+                { text: 'Buyer', value: 'buyer' },
+            ],
+            onFilter: (value, record) => {
+                if (value === 'seller') return record.sellerId == userId;
+                if (value === 'buyer') return record.buyerId == userId;
+                return true;
+            },
             render: (_, record) => {
                 if (record.sellerId == userId) {
                     return <Tag color="green">Seller</Tag>
@@ -90,8 +111,14 @@ let UserTransactionsComponent = ({userId}) => {
         {
             title: "Price (€)",
             key: "price",
-            render: (_, record) => {
-                return record.productPrice ? `€${record.productPrice}` : '-'
+            dataIndex: "productPrice",
+            sorter: (a, b) => (a.productPrice || 0) - (b.productPrice || 0),
+            render: (price) => {
+                return price ? (
+                    <Text strong className={styles.priceText}>
+                        € {price}
+                    </Text>
+                ) : '-'
             }
         },
     ]
@@ -109,6 +136,7 @@ let UserTransactionsComponent = ({userId}) => {
             columns={transactionColumns} 
             dataSource={transactions}
             pagination={{ pageSize: 10 }}
+            scroll={{ x: true }}
         />
     )
 }

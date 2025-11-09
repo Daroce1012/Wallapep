@@ -1,8 +1,9 @@
 import {useState, useEffect } from "react";
 import { Card, Typography, Row, Col, Spin, Avatar, Space, Divider, Tabs, Statistic } from 'antd';
-import { UserOutlined, MailOutlined, GlobalOutlined, IdcardOutlined, ShoppingOutlined, DollarOutlined } from '@ant-design/icons';
+import { UserOutlined, MailOutlined, GlobalOutlined, IdcardOutlined, ShoppingOutlined, DollarOutlined, CalendarOutlined } from '@ant-design/icons';
 import UserTransactionsComponent from './UserTransactionsComponent';
 import UserProductsComponent from './UserProductsComponent';
+import { apiGet } from '../../../utils/UtilsApi';
 
 const { Title, Text } = Typography;
 
@@ -12,6 +13,7 @@ let UserProfileComponent = ({userId}) => {
     let [productsCount, setProductsCount] = useState(0)
     let [totalSales, setTotalSales] = useState(0)
     let [totalPurchases, setTotalPurchases] = useState(0)
+    let [lastTransactionDate, setLastTransactionDate] = useState(null)
     let [loading, setLoading] = useState(true)
     let [activeTab, setActiveTab] = useState('products')
 
@@ -36,61 +38,33 @@ let UserProfileComponent = ({userId}) => {
     }
 
     let loadUser = async () => {
-        let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/users/"+userId,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey") || ""
-                },
-            });
-
-        if ( response.ok ){
-            let jsonData = await response.json();
+        let jsonData = await apiGet(`/users/${userId}`);
+        if (jsonData) {
+            console.log("User data from API:", jsonData); // Para depuración
             setUser(jsonData);
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
         }
     }
 
     let loadCounts = async () => {
         try {
-            let sellerResponse = await fetch(
-                process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions/public?sellerId="+userId,
-                {
-                    method: "GET",
-                    headers: {
-                        "apikey": localStorage.getItem("apiKey") || ""
-                    },
-                });
-
-            let buyerResponse = await fetch(
-                process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/transactions/public?buyerId="+userId,
-                {
-                    method: "GET",
-                    headers: {
-                        "apikey": localStorage.getItem("apiKey") || ""
-                    },
-                });
+            let [sales, purchases, productsData] = await Promise.all([
+                apiGet("/transactions/public", { params: { sellerId: userId } }),
+                apiGet("/transactions/public", { params: { buyerId: userId } }),
+                apiGet("/products", { params: { sellerId: userId } })
+            ]);
 
             let allTransactions = [];
             let salesCount = 0;
             let purchasesCount = 0;
 
-            if (sellerResponse.ok) {
-                let sellerData = await sellerResponse.json();
-                allTransactions = [...allTransactions, ...sellerData];
-                salesCount = sellerData.length;
+            if (sales) {
+                allTransactions = [...allTransactions, ...sales];
+                salesCount = sales.length;
             }
 
-            if (buyerResponse.ok) {
-                let buyerData = await buyerResponse.json();
-                allTransactions = [...allTransactions, ...buyerData];
-                purchasesCount = buyerData.length;
+            if (purchases) {
+                allTransactions = [...allTransactions, ...purchases];
+                purchasesCount = purchases.length;
             }
 
             // Remove duplicates based on transaction id
@@ -98,21 +72,21 @@ let UserProfileComponent = ({userId}) => {
                 index === self.findIndex(t => t.id === transaction.id)
             );
 
+            // Find last transaction date
+            let lastDate = null;
+            uniqueTransactions.forEach(transaction => {
+                let transactionDate = transaction.date || 0;
+                if (!lastDate || transactionDate > lastDate) {
+                    lastDate = transactionDate;
+                }
+            });
+
             setTransactionsCount(uniqueTransactions.length);
             setTotalSales(salesCount);
             setTotalPurchases(purchasesCount);
+            setLastTransactionDate(lastDate);
 
-            let productsResponse = await fetch(
-                process.env.NEXT_PUBLIC_BACKEND_BASE_URL+"/products?sellerId="+userId,
-                {
-                    method: "GET",
-                    headers: {
-                        "apikey": localStorage.getItem("apiKey") || ""
-                    },
-                });
-
-            if (productsResponse.ok) {
-                let productsData = await productsResponse.json();
+            if (productsData) {
                 setProductsCount(productsData.length);
             }
         } catch (error) {
@@ -159,6 +133,10 @@ let UserProfileComponent = ({userId}) => {
                     description={
                         <Space direction="vertical" size="middle">
                             <Space>
+                                <UserOutlined />
+                                <Text>Name: {user.name || '-'}</Text>
+                            </Space>
+                            <Space>
                                 <IdcardOutlined />
                                 <Text>ID: {user.id}</Text>
                             </Space>
@@ -179,7 +157,7 @@ let UserProfileComponent = ({userId}) => {
                 />
                 <Divider />
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} sm={8}>
+                    <Col xs={24} sm={12} md={8}>
                         <Statistic
                             title="Total Sales"
                             value={totalSales}
@@ -187,7 +165,7 @@ let UserProfileComponent = ({userId}) => {
                             valueStyle={{ color: '#52c41a' }}
                         />
                     </Col>
-                    <Col xs={24} sm={8}>
+                    <Col xs={24} sm={12} md={8}>
                         <Statistic
                             title="Total Purchases"
                             value={totalPurchases}
@@ -195,7 +173,7 @@ let UserProfileComponent = ({userId}) => {
                             valueStyle={{ color: '#1890ff' }}
                         />
                     </Col>
-                    <Col xs={24} sm={8}>
+                    <Col xs={24} sm={12} md={8}>
                         <Statistic
                             title="Products for Sale"
                             value={productsCount}

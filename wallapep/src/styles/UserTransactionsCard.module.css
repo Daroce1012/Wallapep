@@ -11,10 +11,10 @@
   transition: all 0.3s;
 }
 
-.transactionCard:hover {
+/* .transactionCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
+} */
 
 .transactionTitle {
   font-size: 18px;

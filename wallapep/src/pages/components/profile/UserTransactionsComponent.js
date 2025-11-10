@@ -69,9 +69,9 @@ let UserTransactionsComponent = ({userId}) => {
         <Row gutter={[16, 16]}>
             {transactions.map(transaction => (
                 <Col key={transaction.id} xs={24} sm={12} md={8} lg={6}>
-                    <Link href={`/detailTransaction/${transaction.id}`} className={styles.transactionCardLink}>
+                    {/* <Link href={`/detailTransaction/${transaction.id}`} className={styles.transactionCardLink}> */}
                         <Card
-                            hoverable
+                            
                             className={styles.transactionCard}
                             title={<Title level={5} className={styles.transactionTitle}>{transaction.title || `Transaction #${transaction.id}`}</Title>}
                         >
@@ -84,7 +84,7 @@ let UserTransactionsComponent = ({userId}) => {
                                 )} */}
                             </Space>
                         </Card>
-                    </Link>
+                    {/* </Link> */}
                 </Col>
             ))}
         </Row>

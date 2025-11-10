@@ -34,7 +34,7 @@ export default function App({ Component, pageProps }) {
             setCurrent([]); // Deseleccionar todo si estamos en el perfil
         } else if (pathname === '/') {
             setCurrent(['menuHome']); // Seleccionar 'Home' para la ruta raíz
-        } else {
+        } else if (pathname) { // Añadir esta comprobación
             // Extraer la clave del menú de la ruta, por ejemplo, /products -> Products -> menuProducts
             const pathKey = pathname.split('/')[1];
             if (pathKey) {

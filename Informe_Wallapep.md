@@ -1,4 +1,4 @@
-# Informe de Análisis de Usabilidad - Wallapep
+# Informe de Wallapep
 
 ## 1. Puntos Implementados y su Justificación
 
@@ -72,24 +72,20 @@
 
 ---
 
-## 2. Introducción
+## 2. Análisis Detallado por Sección
 
-Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wallapep, evaluando diferentes aspectos de la interfaz de usuario y la experiencia del usuario. El objetivo es identificar las fortalezas y posibles áreas de mejora de la aplicación web, basándose en la encuesta proporcionada.
-
-## 3. Análisis Detallado por Sección
-
-### 3.1. Creación de Cuenta de Usuario
+### 2.1. Creación de Cuenta de Usuario
 
 *   **Pregunta 1.a: ¿Es ágil seleccionar el país?, puedo tanto comenzar a escribir y filtrar en una lista como seleccionar directamente de la lista.**
     *   **Respuesta:** Sí, la selección del país es ágil. El componente `Select` de Ant Design utilizado en `wallapep/src/pages/components/user/CreateUserComponent.js` (`línea 203`) tiene las propiedades `showSearch` y `filterOption` habilitadas. Esto permite al usuario tanto escribir para filtrar la lista de países como seleccionar directamente de la lista. Además, la propiedad `allowClear` facilita la eliminación de la selección.
 
-### 3.2. Creación de Productos
+### 2.2. Creación de Productos
 
 *   **Pregunta 2.a: ¿Sí introduzco un producto con muy poca o mucha información se descuadran los layouts de la página que muestran ese producto?**
     *   **Respuesta:** El sistema maneja bien la **poca información** sin descuadrar los layouts, usando placeholders para imágenes (en `wallapep/src/pages/components/common/ProductCard.js`, `líneas 23-33`) y mostrando descripciones condicionalmente.
-    *   Para el caso de "mucha información", específicamente títulos y descripciones muy largas en las tarjetas de producto (`wallapep/src/pages/components/common/ProductCard.js`), el CSS `wallapep/src/styles/ProductCard.module.css` no implementa un truncamiento explícito (`text-overflow: ellipsis;` o `max-height` con `overflow: hidden;`). Esto significa que, si un título o una descripción son excesivamente largos, podrían hacer que las tarjetas se expandan verticalmente. En la página de detalles del producto (`wallapep/src/pages/components/products/DetailsProductComponent.js`), las descripciones largas se ajustan correctamente dentro de su contenedor gracias a `word-break: break-word;` en `wallapep/src/styles/DetailsProduct.module.css` (`líneas 74-75`).
+    *   Para el caso de "mucha información", específicamente títulos y descripciones muy largas en las tarjetas de producto (`wallapep/src/pages/components/common/ProductCard.js`), el CSS `wallapep/src/styles/ProductCard.module.css` no implementa un truncamiento explícito (`text-overflow: ellipsis;` o `max-height` con `overflow: hidden;`). Esto significa que, si un título o una descripción son excesivamente largos, podrían hacer que las tarjetas se expandan verticalmente. En la página de detalles del producto (`wallapep/src/pages/components/products/DetailsProductComponent.js`), las descripciones largas se ajustan correctamente dentro de su contenedor gracias a `word-break: break-word;` en `wallapep/src/styles/DetailsProduct.module.css` (`líneas 74-75`). Cuando se crea un producto se limita la descripción a 100 caracteres para evitar demasida información.
 
-### 3.3. Tablas de Productos, Transacciones y Ofertas Recibidas
+### 2.3. Tablas de Productos, Transacciones y Ofertas Recibidas
 
 *   **Pregunta 3.a: ¿Las tablas tienen filtrado y ordenado por los campos relevantes?**
     *   **Respuesta:** Sí, ambas tablas (`wallapep/src/pages/components/products/ListMyProductsComponent.js` y `wallapep/src/pages/components/transactions/ListMyTransactionsComponent.js`) tienen capacidades de filtrado y ordenado.
@@ -110,7 +106,7 @@ Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wal
     *   En "Mis Transacciones": muestra "Total Earned", "Total Spent" y "Total Transactions" (`líneas 78-140`).
     *   Estos resúmenes son generales y no incluyen métricas específicas "en el último mes".
 
-### 3.4. Listado de Productos (como comprador)
+### 2.4. Listado de Productos (como comprador)
 
 *   **Pregunta 4.a: ¿ofrezco un mecanismo de búsqueda o filtrado adecuado para el tipo de página?**
     *   **Respuesta:** Sí, la página de listado de productos (`wallapep/src/pages/components/products/ListProductsComponent.js`) ofrece un mecanismo de búsqueda y filtrado completo a través de `wallapep/src/pages/components/products/ProductFiltersComponent.js`. Incluye filtros por categoría, título, precio mínimo y precio máximo.
@@ -125,37 +121,37 @@ Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wal
 *   **Pregunta 4.f: ¿Permito comprar directamente un producto desde el listado de productos?**
     *   **Respuesta:** Sí, cada `ProductCard` en el listado de productos puede mostrar un botón "Buy" (`showBuyButton={true}` en `ListProductsComponent.js`, `línea 179`). Al hacer clic, se inicia un proceso de compra con confirmación y registro de transacción.
 
-### 3.5. Perfil de Usuario
+### 2.5. Perfil de Usuario
 
 *   **Pregunta 5.a: Muestra o da acceso a las transacciones que ha realizo un usuario ¿pero puedo ver rápidamente un resumen de esa información? Como el número de compras/ventas que ha realizo, o hace cuando tiempo ha realizado la última transacción.**
     *   **Respuesta:** Sí, el perfil de usuario (`wallapep/src/pages/components/profile/UserProfileComponent.js`) muestra un resumen rápido de "Total Sales", "Total Purchases", "Products for Sale" y "Total Transactions" a través de un `Card` de estadísticas (`líneas 257-275`). También proporciona acceso a una lista detallada de transacciones. No incluye explícitamente el "tiempo de la última transacción" en el resumen principal.
 
-### 3.6. Información Relevante Antes de Realizar una Compra
+### 2.6. Información Relevante Antes de Realizar una Compra
 
 *   **Pregunta 6.a: ¿Necesito mucha navegación para ver la “reputación” de un usuario?, entendiendo por reputación el número de transacciones que ha realizado ¿o puedo verlo desde la propia lista de productos o detalles?**
     *   **Respuesta:** La reputación del usuario no es visible directamente en el listado de productos. Sin embargo, está claramente accesible en la página de detalles de cada producto (`wallapep/src/pages/components/products/DetailsProductComponent.js`), donde el componente `ReputationTags` (`línea 175`) muestra el total de transacciones, ventas y compras del vendedor.
 
-### 3.7. Referencias o Enlaces a Usuarios
+### 2.7. Referencias o Enlaces a Usuarios
 
 *   **Pregunta 7.a: Cuando pongo una referencia a un usuario en alguna parte, por ejemplo, la descripción a un producto que incluye el nombre de su vendedor ¿Utilizo un avatar junto al nombre del usuario para que ayude a identificarlo?**
     *   **Respuesta:** Sí, en la página de detalles del producto (`DetailsProductComponent.js`, `líneas 168-172`), se muestra un `Avatar` con un icono `UserOutlined` junto al nombre del vendedor y un enlace a su perfil. En el perfil del usuario (`UserProfileComponent.js`, `líneas 203-207`), también se usa un avatar. Sin embargo, en la tabla de "Mis Transacciones" (`ListMyTransactionsComponent.js`), solo se muestra el nombre/email del usuario como enlace, sin avatar.
 
-### 3.8. Validaciones de Entrada de Datos
+### 2.8. Validaciones de Entrada de Datos
 
 *   **Pregunta 8.a: ¿admito valores negativos para precios?**
     *   **Respuesta:** No, el sistema no admite valores negativos para precios. Los formularios de creación y edición de productos (`CreateProductComponent.js`, `EditProductFormComponent.js`) y el `PriceEditor.js` (`líneas 25, 113` y `12` respectivamente) tienen reglas de validación que exigen precios mayores o iguales a 0.01.
 *   **Pregunta 8.b: ¿fechas que no tengan sentido?, como un nacimiento posterior al día actual.**
-    *   **Respuesta:** Sí, en la creación de cuentas de usuario (`CreateUserComponent.js`, `líneas 228-231`), el campo de fecha de nacimiento utiliza `disabledDate` para deshabilitar fechas futuras. En la edición de productos (`EditProductFormComponent.js`), no se observa una validación similar para evitar fechas futuras en la fecha del producto.
+    *   **Respuesta:** Sí, en la creación de cuentas de usuario (`CreateUserComponent.js`, `líneas 228-231`), el campo de fecha de nacimiento utiliza `disabledDate` para deshabilitar fechas futuras.
 
-### 3.9. Imágenes e Iconos
+### 2.9. Imágenes e Iconos
 
 *   **Pregunta 9.a: ¿Uso imágenes e icono para aumentar la velocidad de reconocimiento?, por ejemplo:**
-    *   **i. En opciones de menú:** Es muy probable, dado el uso consistente en otras partes de la interfaz (no se revisó el componente de menú directamente).
+    *   **i. En opciones de menú:** Si delante de cada elemento del menú se utiliza un icono.
     *   **ii. Delante de los títulos de cada página:** Sí, el `CardHeader.js` se utiliza para mostrar iconos relevantes junto a los títulos de las páginas/secciones (e.g., `ShoppingOutlined` para "Products" en `ListProductsComponent.js`, `UserAddOutlined` para "Create Your Account" en `CreateUserComponent.js`).
     *   **iii. Asociando un icono a cada categoría (quizá también hasta un color):** Sí, las categorías (`wallapep/src/pages/components/home/CategoriesSection.js`, `líneas 25-55` y `wallapep/src/utils/UtilsCategories.js`, `líneas 1-10`) tienen emojis asociados (que actúan como iconos) y las etiquetas de categoría usan colores.
     *   **iv. Asociando un icono a valores de tipos concretos junto al valor, fechas...:** Sí, en formularios (`CreateUserComponent.js`), detalles de usuario (`UserProfileComponent.js`) y estadísticas, se utilizan iconos como prefijos o sufijos para mejorar el reconocimiento visual del tipo de dato.
 
-### 3.10. Sitio Web General
+### 2.10. Sitio Web General
 
 *   **Pregunta 10.a: ¿Siempre puedo identificar claramente en que parte de la página estoy?**
     *   **Respuesta:** Sí, a través de una barra de navegación con enlaces descriptivos e iconos, y títulos claros y contextuales en cada página o sección. No obstante, una implementación de Breadcrumbs podría mejorar aún más la claridad en rutas anidadas.
@@ -164,17 +160,14 @@ Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wal
 *   **Pregunta 10.c: Uso un favicon y título en el sitio web.**
     *   **Respuesta:** Sí, se utiliza un favicon (`/logo.png` especificado en `wallapep/src/pages/_document.js`, `línea 7`) y el título del sitio web es "Wallapep - Buy and Sell Products" (`wallapep/src/pages/_app.js`, `línea 96`).
 
-## 4. Tareas y Análisis KLM
-
-### 4.1 – Listado de tareas de la aplicación.
+## 3. Listado de tareas de la aplicación.
 
 **•	/** (Página de inicio)
-    *   Ver los últimos productos agregados
+    *   Acceder a la página de mis productos/transacciones (si está logueado)
+    *   Ver los productos
     *   Buscar productos por categoría
     *   Buscar productos por nombre/descripción
-    *   Ver productos destacados o promocionados
     *   Acceder a la página de login/registro
-    *   Acceder a la página de mis productos/transacciones (si está logueado)
 
 **•	/products**
     *   Buscar productos por categoría
@@ -187,14 +180,9 @@ Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wal
 **•	/detailProduct/:id**
     *   Ver información detallada del producto (descripción, precio, imágenes)
     *   Ver información del vendedor
-    *   Contactar al vendedor
-    *   Realizar una oferta por el producto
-    *   Añadir el producto a favoritos
-    *   Reportar el producto
 
 **•	/login**
     *   Iniciar sesión con credenciales existentes
-    *   Recuperar contraseña
     *   Acceder a la página de registro
 
 **•	/register**
@@ -202,36 +190,25 @@ Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wal
     *   Volver a la página de login
 
 **•	/createProduct**
-    *   Introducir detalles del nuevo producto (nombre, descripción, precio, categoría, imágenes)
-    *   Publicar el producto
+    *   Introducir detalles del nuevo producto y publicarlo (nombre, descripción, precio, categoría, imágenes)
     *   Cancelar la creación del producto
 
 **•	/myProducts**
     *   Ver la lista de productos propios publicados
+    *   Ver el estado de mis productos y sus estadísticas
     *   Editar un producto existente
     *   Eliminar un producto
-    *   Marcar un producto como vendido/reservado
-    *   Ver el estado de las ofertas recibidas en mis productos
-
+   
 **•	/editProduct/:id**
     *   Modificar la información de un producto propio
-    *   Actualizar las imágenes del producto
     *   Guardar los cambios del producto
     *   Cancelar la edición
 
-**•	/profile**
+**•	/profile y /user/:id**
     *   Ver el perfil del usuario (propio)
-    *   Editar información del perfil (nombre, email, contraseña)
-    *   Ver estadísticas del usuario (productos vendidos, compras realizadas, valoraciones)
+    *   Ver estadísticas del usuario
     *   Ver la reputación del usuario
-    *   Acceder a "Mis productos"
-    *   Acceder a "Mis transacciones"
-
-**•	/user/:id**
-    *   Ver el perfil de otro usuario
-    *   Ver los productos publicados por otro usuario
-    *   Ver la reputación de otro usuario
-    *   Contactar a otro usuario
+    *   Ver sus productos y transacciones
 
 **•	/myTransactions**
     *   Ver la lista de transacciones realizadas (compras y ventas)
@@ -240,12 +217,10 @@ Este informe presenta un análisis exhaustivo de la usabilidad del sitio web Wal
 
 **•	/detailTransaction/:id**
     *   Ver información detallada de una transacción específica (productos, precio, estado, comprador/vendedor)
-    *   Comunicarse con la otra parte de la transacción
-    *   Valorar al comprador/vendedor (si la transacción ha finalizado)
 
 ---
 
-### 4.2 – KLM
+## 4. Análisis KLM
 
 Se han seleccionado dos tareas para el análisis KLM:
 
@@ -254,7 +229,7 @@ Se han seleccionado dos tareas para el análisis KLM:
 
 ---
 
-### **Informe de la Tarea 1: Buscar productos de una categoría y ver el detalle de un producto**
+### 4.1. Informe de la Tarea 1: Buscar productos de una categoría y ver el detalle de un producto
 
 **1. Descripción de la Tarea**
 La tarea consiste en que un usuario, desde la página principal de productos (`/products`), navegue a través de una categoría específica y, posteriormente, acceda a la vista de detalles de un producto seleccionado dentro de esa categoría.
@@ -287,7 +262,7 @@ Este análisis asume que el usuario ya conoce la ubicación de los elementos de 
 
 ---
 
-### **Informe de la Tarea 2: Iniciar Sesión en la Aplicación**
+### 4.2. Informe de la Tarea 2: Iniciar Sesión en la Aplicación
 
 **1. Descripción de la Tarea**
 La tarea implica que un usuario, desde la página de inicio de sesión (`/login`), ingrese sus credenciales (email y contraseña) en los campos correspondientes y confirme la acción mediante el botón de iniciar sesión.
@@ -321,21 +296,3 @@ La tarea implica que un usuario, desde la página de inicio de sesión (`/login`
 Este análisis asume que el usuario tiene una velocidad de escritura promedio. No considera posibles errores de tecleo o la necesidad de corregirlos, ni el tiempo de carga de la página después de enviar el formulario. El factor "M" es una estimación del tiempo de procesamiento mental del resultado del login.
 
 **Nota sobre KLM:** Los tiempos asignados a K (pulsación de tecla), P (apuntar con el ratón), H (cambio de manos de teclado a ratón), M (operación mental) son valores promedio estándar. En un entorno real, estos tiempos pueden variar significativamente según el usuario, la interfaz y el hardware.
-
-## 5. Conclusiones y Recomendaciones
-
-### 5.1. Fortalezas
-
-*   **Interfaz Intuitiva y Guiada:** El uso consistente de iconos, títulos descriptivos y elementos visuales claros facilita la navegación y el reconocimiento rápido de la información en toda la aplicación.
-*   **Funcionalidades Clave Bien Implementadas:** La búsqueda y filtrado de productos, la edición rápida de precios en la tabla de productos, y la visibilidad de la reputación del vendedor en los detalles del producto son características que mejoran significativamente la experiencia del usuario.
-*   **Diseño Responsivo:** Las tablas y las tarjetas de productos se adaptan correctamente a diferentes tamaños de pantalla, lo que garantiza una buena usabilidad en dispositivos móviles y de escritorio.
-*   **Validaciones Robustas:** Las validaciones de campos como el precio (valores positivos) y la fecha de nacimiento (no fechas futuras) demuestran un enfoque en la calidad de los datos y la prevención de errores del usuario.
-
-### 5.2. Áreas de Mejora
-
-*   **Truncamiento de Texto en Tarjetas de Producto:** Considerar la implementación de `text-overflow: ellipsis;` o `max-height` con `overflow: hidden;` para títulos y descripciones largas en las tarjetas de productos, a fin de mantener un layout más uniforme y evitar que el contenido desborde los contenedores.
-*   **Resumen de Transacciones Más Detallado:** Aunque se proporcionan resúmenes generales de transacciones, añadir métricas temporales (ej. "productos comprados/vendidos en el último mes", "última transacción hace X tiempo") podría enriquecer la información disponible para el usuario.
-*   **Avatares en Tablas de Transacciones:** Incluir avatares junto a los nombres de usuario en las tablas de transacciones podría mejorar la identificación visual y la coherencia con otras secciones de la aplicación.
-*   **Validación de Fecha de Productos:** Evaluar si es necesario aplicar una validación de fecha similar a la del cumpleaños del usuario para los productos (evitando fechas futuras) en el formulario de edición, según el contexto de cuándo se espera que se "publiquen" los productos.
-*   **Implementación de Breadcrumbs:** Para mejorar aún más la claridad de la ubicación del usuario, especialmente en rutas anidadas, se recomienda implementar el componente `Breadcrumb` de Ant Design.
-*   **Navegación del menú con estado activo**: Aunque el menú funciona, no hay un resaltado explícito del elemento de menú que corresponde a la página actual. Esto se podría mejorar para que el usuario siempre sepa qué parte del menú corresponde a la página en la que se encuentra.

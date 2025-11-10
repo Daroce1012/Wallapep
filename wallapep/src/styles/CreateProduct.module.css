@@ -1,21 +1,194 @@
+/* Contenedor principal */
 .container {
-  min-height: 70vh;
+  padding: 10px 20px; /* Reducido aún más el padding vertical */
+  background: none; /* Eliminar el fondo degradado */
+  display: flex; /* Habilitar flexbox */
+  justify-content: center; /* Centrar horizontalmente */
+  /* align-items: center; */ /* Eliminar o ajustar centrado vertical para evitar scroll */
 }
 
+/* Card principal */
 .card {
-  width: 500px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  max-width: 600px; /* Revertido a su tamaño original */
+  width: 100%; /* Asegurar que ocupe el ancho disponible */
+  margin: 0 auto; /* Centrar la tarjeta horizontalmente */
 }
 
+.card :global(.ant-card-head) {
+  background: none; /* Eliminar el fondo degradado */
+  border-bottom: none;
+  padding: 24px 24px 10px 24px; /* Reducido el padding-bottom para disminuir el espacio */
+}
+
+.card :global(.ant-card-head-title) {
+  color: #1a1a1a; /* Cambiar a negro */
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.card :global(.ant-card-body) {
+  padding: 16px 32px 0px 32px; /* Reducido el padding-top */
+}
+
+/* Header */
 .headerIcon {
-  font-size: 20px;
+  font-size: 28px;
+  color: #1a1a1a; /* Cambiar a negro */
+}
+
+.headerTitle {
+  color: #1a1a1a; /* Cambiar a negro */
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Form Items */
+.card :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+/* Input de precio */
+.priceInput {
+  width: 100%;
+}
+
+.priceInput :global(.ant-input-number-input) {
+  font-size: 18px;
+  font-weight: 600;
   color: #1890ff;
 }
 
-.uploadButton {
-  width: 100%;
+/* Upload container */
+.uploadContainer :global(.ant-upload-select) {
+  width: 100px !important; /* Ajustar ancho */
+  height: 100px !important; /* Ajustar altura */
+  border-radius: 8px;
+  border: 2px dashed #d9d9d9;
+  transition: all 0.3s ease;
 }
 
-.priceInput {
-  width: 100%;
+.uploadContainer :global(.ant-upload-select:hover) {
+  border-color: #1890ff;
+  background-color: #f0f5ff;
+}
+
+.uploadButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.uploadContainer :global(.ant-upload-list-picture-card-container) {
+  width: 100px !important; /* Ajustar ancho */
+  height: 100px !important; /* Ajustar altura */
+}
+
+/* Botón de submit */
+.submitButton {
+  margin-top: 8px; /* Reducido el margen superior */
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+/* Inputs y TextAreas */
+.card :global(.ant-input),
+.card :global(.ant-input-number),
+.card :global(.ant-select-selector),
+.card :global(.ant-input-textarea) {
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+}
+
+.card :global(.ant-input:focus),
+.card :global(.ant-input-number:focus-within),
+.card :global(.ant-select-focused .ant-select-selector),
+.card :global(.ant-input-textarea:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Character counter */
+.card :global(.ant-input-textarea-show-count::after),
+.card :global(.ant-input-show-count-suffix) {
+  color: #999;
+  font-size: 12px;
+}
+
+/* Form validation */
+.card :global(.ant-form-item-has-error .ant-input),
+.card :global(.ant-form-item-has-error .ant-input-number),
+.card :global(.ant-form-item-has-error .ant-select-selector) {
+  border-color: #ff4d4f !important;
+}
+
+.card :global(.ant-form-item-explain-error) {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 12px;
+  }
+  .card :global(.ant-card-head) {
+    padding: 20px;
+  }
+  .card :global(.ant-card-body) {
+    padding: 20px;
+  }
+  .headerIcon {
+    font-size: 24px;
+  }
+  .headerTitle {
+    font-size: 20px;
+  }
+  .uploadContainer :global(.ant-upload-select),
+  .uploadContainer :global(.ant-upload-list-picture-card-container) {
+    width: 104px !important;
+    height: 104px !important;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Estados de loading */
+.card :global(.ant-btn-loading) {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 

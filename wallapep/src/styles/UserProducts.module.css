@@ -11,12 +11,15 @@
   width: 90px;
 }
 
-.priceInput {
-  width: 120px;
-}
-
 .priceText {
   color: #1890ff;
   font-size: 16px;
+}
+
+.tagStatus {
+  width: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 

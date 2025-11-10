@@ -1,0 +1,163 @@
+/* Product Card */
+.productLink {
+  text-decoration: none;
+}
+
+.productCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 8px; /* Más sutil */
+  background-color: white; /* Fondo blanco */
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Sombra más suave */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none; /* Eliminado el borde */
+  overflow: hidden;
+  cursor: pointer;
+  height: 100%;
+}
+
+.productCard:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra al pasar el ratón */
+  transform: translateY(-2px); /* Efecto sutil al pasar el ratón */
+}
+
+.productImageContainer {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Hacer que la imagen sea cuadrada */
+  border-radius: 6px; /* Bordes redondeados para la imagen */
+  background-color: #f1f5f9;
+  overflow: hidden;
+  position: relative;
+}
+
+.noImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-light); /* Fondo claro */
+  border-radius: 6px;
+}
+
+.noImageIcon {
+  font-size: 60px; /* Tamaño del icono */
+  color: var(--text-secondary-light); /* Color del icono */
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.03); /* Zoom sutil al pasar el ratón */
+}
+
+.productStarBadge {
+  position: absolute;
+  top: 8px; /* Ajustar posición */
+  right: 8px; /* Ajustar posición */
+  background-color: white;
+  border-radius: 50%;
+  width: 32px; /* Reducir tamaño */
+  height: 32px; /* Reducir tamaño */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1); /* Sombra más suave */
+}
+
+.productStarBadge svg {
+  color: #fbbf24;
+  font-size: 16px; /* Reducir tamaño del icono */
+}
+
+.productContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Espaciar título/precio y botón */
+  padding: 12px; /* Padding uniforme en todos los lados */
+}
+
+.productTitleCompact {
+  font-size: 16px; /* Tamaño de fuente ajustado */
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-light); /* Usar variable global */
+  line-height: 1.4;
+}
+
+.productTitleDetailed {
+  font-size: 18px; /* Tamaño de fuente ajustado */
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-light); /* Usar variable global */
+  line-height: 1.4;
+}
+
+.productDescription {
+  font-size: 13px; /* Tamaño de fuente más pequeño */
+  color: #64748b; /* Color original */
+  margin: 4px 0 8px 0; /* Margen superior e inferior */
+  line-height: 1.5;
+}
+
+.productFooter {
+  display: flex;
+  flex-direction: column; /* Apilar precio y botón */
+  align-items: flex-start; /* Alinear a la izquierda */
+  padding-top: 8px; /* Padding superior */
+  border-top: 1px solid #f1f5f9; /* Separador sutil */
+  margin-top: 8px;
+}
+
+.productPrice {
+  font-size: 16px; /* Tamaño de fuente del precio */
+  font-weight: 700;
+  color: var(--text-secondary-light); /* Usar variable global */
+  margin-bottom: 0; /* No se necesita margen inferior si el botón está abajo */
+  width: 100%; /* Asegura que ocupe todo el ancho para la alineación */
+  text-align: left; /* Alineado a la izquierda */
+}
+
+.productBuyButton {
+  width: 100%; /* Ocupar todo el ancho disponible */
+  height: 36px; /* Altura fija */
+  border-radius: 6px; /* Bordes redondeados */
+  background-color: var(--primary); /* Usar variable global */
+  color: white !important; /* Texto blanco como solicitado */
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.productBuyButton:hover {
+  background-color: #0d6edc; /* Color hover del nuevo primario */
+}
+
+.productViewButton {
+  width: 100%;
+  height: 36px;
+  border-radius: 6px;
+  background-color: var(--primary); /* Usar variable global */
+  color: white !important; /* Texto blanco como solicitado */
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.productViewButton:hover {
+  background-color: #0d6edc; /* Color hover del nuevo primario */
+}

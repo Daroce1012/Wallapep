@@ -1,40 +1,79 @@
-import React from 'react';
-import { Typography, Space } from 'antd';
-import { TruckOutlined, DollarCircleOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import styles from '../../../styles/HeroSection.module.css';
+import { Typography, Space, Row, Col, Button } from 'antd';
+import {
+  TruckOutlined,
+  SafetyOutlined,
+  DollarCircleOutlined
+} from '@ant-design/icons';
+import Link from 'next/link';
+import styles from '../../../styles/Home.module.css';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Text } = Typography;
 
-export default function HeroSection() {
+const HeroSection = () => {
+  const features = [
+    {
+      icon: <TruckOutlined />,
+      title: 'Free Shipping',
+      description: 'On orders over €50'
+    },
+    {
+      icon: <SafetyOutlined />,
+      title: 'Secure Payment',
+      description: '100% protected'
+    },
+    {
+      icon: <DollarCircleOutlined />,
+      title: 'Best Prices',
+      description: 'Guaranteed'
+    }
+  ];
+
   return (
-    <div className={styles.hero}>
-      <div className={styles.content}>
-        <Title level={1} className={styles.title}>
-          Welcome to Wallapep
-        </Title>
-        <Paragraph className={styles.paragraph}>
-          Your trusted marketplace to find everything you need
-        </Paragraph>
-        <Paragraph className={styles.paragraphSecondary}>
-          Discover thousands of quality products organized by categories.
-          Shop safely and receive your orders in record time.
-          From technology to books, we have everything you're looking for at the best price.
-        </Paragraph>
-        <Space size="large" wrap>
-          <Space>
-            <TruckOutlined className={styles.icon} />
-            <Text className={styles.text}>Free Shipping</Text>
-          </Space>
-          <Space>
-            <DollarCircleOutlined className={styles.icon} />
-            <Text className={styles.text}>Best Prices</Text>
-          </Space>
-          <Space>
-            <SafetyCertificateOutlined className={styles.icon} />
-            <Text className={styles.text}>Guaranteed Quality</Text>
-          </Space>
-        </Space>
+    <div className={styles.heroContainer}>
+      <div className={styles.heroBackground} />
+      <div className={styles.mainContentWrapper}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroContentInner}>
+            <div className={styles.heroTextContainer}>
+                <Title level={1} className={styles.heroTitle}>
+                  Welcome to Wallapep
+                </Title>
+
+                <Text className={styles.heroSubtitle}>
+                  Discover the latest trends and enjoy up to 50% off on selected items. Don't miss out!
+                </Text>
+
+                <Link href="/products">
+                  <Button type="primary" size="large" className={styles.heroButton}>
+                    Shop Now
+                  </Button>
+                </Link>
+              </div>
+
+              <Row gutter={[32, 32]} justify="center" className={styles.heroFeaturesRow}>
+                {features.map((feature, index) => (
+                  <Col xs={24} sm={8} key={index}>
+                    <Space direction="vertical" align="center" size={12}>
+                      <div className={styles.heroFeatureIcon}>
+                        {feature.icon}
+                      </div>
+                      <div>
+                        <Text className={styles.heroFeatureTitle}>
+                          {feature.title}
+                        </Text>
+                        <Text className={styles.heroFeatureDescription}>
+                          {feature.description}
+                        </Text>
+                      </div>
+                    </Space>
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
   );
-}
+};
+
+export default HeroSection;

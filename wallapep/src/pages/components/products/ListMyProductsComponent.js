@@ -1,304 +1,263 @@
-import {useState, useEffect} from "react";
-import { Table, Space, Typography, Input, Button, Tag, InputNumber, Card, Empty, Row, Col, Statistic } from 'antd';
-import { ShoppingOutlined, EditOutlined, CheckOutlined, CloseOutlined, DollarOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useState, useEffect, useMemo } from "react";
+import { Table, Space, Typography, Input, Button, Tag, Card, Empty, Modal, message } from 'antd';
+import { ShoppingOutlined, EditOutlined, DeleteOutlined, DollarOutlined } from '@ant-design/icons';
 import Link from "next/link";
 import { timestampToString } from "../../../utils/UtilsDates";
-import { apiGet, apiDelete, apiPut } from '../../../utils/UtilsApi'; // Importar métodos de UtilsApi
+import { apiGet, apiDelete, apiPut } from '../../../utils/UtilsApi';
+import StatisticsCard from '../common/StatisticsCard'; // Ruta corregida
+import PriceEditor from './PriceEditor';
 import styles from '../../../styles/ListMyProducts.module.css';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
-let ListMyProductsComponent = () => {
-    let [products, setProducts] = useState([])
-    let [editingId, setEditingId] = useState(null);
-    let [editingPrice, setEditingPrice] = useState(null);
-    let [editingProduct, setEditingProduct] = useState(null); // Nuevo estado para el producto completo en edición
-    let [totalProducts, setTotalProducts] = useState(0);
-    let [soldProducts, setSoldProducts] = useState(0);
-    let [availableProducts, setAvailableProducts] = useState(0);
+// ============================================
+// COMPONENTE PRINCIPAL
+// ============================================
 
-    useEffect(() => {
-        getMyProducts();
-    }, [])
+const ListMyProductsComponent = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editPrice, setEditPrice] = useState(null);
+  const [modal, contextHolderModal] = Modal.useModal();
 
-    // useEffect para calcular estadísticas cada vez que los productos cambian
-    useEffect(() => {
-        calculateStatistics(products);
-    }, [products]);
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
-    let deleteProduct = async (id) => {
-        let result = await apiDelete(`/products/${id}`, {
-            onError: (serverErrors) => {
-                serverErrors.forEach(e => {
-                    // El error ya se maneja en handleApiError
-                })
-            }
-        });
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGet("/products/own/");
+      if (data) {
+        setProducts(data.map(p => ({ ...p, key: p.id })));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (result && result.deleted){
-            let productsAftherDelete = products.filter(p => p.id != id)
-            setProducts(productsAftherDelete)
+  // ============================================
+  // HANDLERS
+  // ============================================
+
+  const startEdit = (product) => {
+    setEditingId(product.id);
+    setEditPrice(product.price);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditPrice(null);
+  };
+
+  const savePrice = async (product) => {
+    if (editPrice === null || editPrice < 0) {
+      message.warning("Enter a valid price");
+      return;
+    }
+
+    const result = await apiPut(`/products/${product.id}`, {
+      ...product,
+      price: editPrice
+    });
+    
+    if (result) {
+      message.success("Price updated");
+      setProducts(prev => prev.map(p => 
+        p.id === product.id ? { ...p, price: editPrice } : p
+      ));
+      cancelEdit();
+    }
+  };
+
+  const deleteProduct = (product) => {
+    modal.confirm({
+      title: 'Delete Product',
+      content: `Delete "${product.title}"? This cannot be undone.`,
+      okText: 'Delete',
+      okType: 'danger',
+      onOk: async () => {
+        const result = await apiDelete(`/products/${product.id}`);
+        if (result?.deleted) {
+          message.success("Product deleted");
+          setProducts(prev => prev.filter(p => p.id !== product.id));
         }
-    }
+      }
+    });
+  };
 
-    let handleEditPrice = (record) => {
-        setEditingId(record.id);
-        setEditingPrice(record.price);
-        setEditingProduct(record); // Guardar el producto completo al iniciar la edición
-    }
+  // ============================================
+  // CONFIGURACIÓN DE COLUMNAS
+  // ============================================
 
-    let handleSavePrice = async (id, newPrice) => {
-
-        if (!editingProduct) {
-            console.error("Error: No hay producto en edición para guardar.");
-            setEditingId(null);
-            setEditingPrice(null);
-            setEditingProduct(null);
-            return;
-        }
-
-        // Crear un objeto con los datos del producto actualizados
-        const updatedProductData = {
-            ...editingProduct,
-            price: newPrice,
-        };
-
-        let result = await apiPut(`/products/${id}`, updatedProductData, {
-            onError: (serverErrors) => {
-                serverErrors.forEach(e => {
-                    // El error ya se maneja en handleApiError
-                })
-            }
-        });
-        if (result) {
-            // Si la actualización es exitosa, recargar todos los productos para asegurar la consistencia
-            getMyProducts();
-        }
-        // Siempre reiniciar el estado de edición después de intentar guardar
-        setEditingId(null);
-        setEditingPrice(null);
-        setEditingProduct(null); // Reiniciar también el producto en edición
-    }
-
-    let handleCancelEdit = () => {
-        setEditingId(null);
-        setEditingPrice(null);
-        setEditingProduct(null);
-    }
-
-    let getMyProducts = async () => {
-        let jsonData = await apiGet("/products/own/", {
-            onError: (serverErrors) => {
-                serverErrors.forEach(e => {
-                    // El error ya se maneja en handleApiError
-                })
-            }
-        });
-        if ( jsonData ){
-            const productsWithKeys = jsonData.map( product => ({
-                ...product,
-                key: product.id
-            }));
-            setProducts(productsWithKeys)
-        }
-    }
-
-    let calculateStatistics = (currentProducts) => {
-        setTotalProducts(currentProducts.length);
-        setSoldProducts(currentProducts.filter(p => p.buyerId).length);
-        setAvailableProducts(currentProducts.filter(p => !p.buyerId).length);
-    }
-
-    let columns = [
-        {
-            title: "Id",
-            dataIndex: "id",
-            key: "id"
-        },
-        {
-            title: "Title",
-            dataIndex: "title",
-            key: "title",
-            sorter: (a, b) => {
-                let titleA = a.title || '';
-                let titleB = b.title || '';
-                return titleA.localeCompare(titleB);
-            },
-            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-                <div className={styles.filterDropdown}>
-                    <Input
-                        placeholder="Search title"
-                        value={selectedKeys[0]}
-                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                        onPressEnter={() => confirm()}
-                        className={styles.filterInput}
-                    />
-                    <Space>
-                        <Button
-                            type="primary"
-                            onClick={() => confirm()}
-                            size="small"
-                            className={styles.filterButton}
-                        >
-                            Search
-                        </Button>
-                        <Button onClick={() => clearFilters()} size="small" className={styles.filterButton}>
-                            Reset
-                        </Button>
-                    </Space>
-                </div>
-            ),
-            onFilter: (value, record) =>
-                record.title && record.title.toLowerCase().includes(value.toLowerCase()),
-            render: (text, record) => (
-                <Link href={`/detailProduct/${record.id}`}>
-                    {text}
-                </Link>
-            )
-        },
-        {
-            title: "Description",
-            dataIndex: "description",
-            key: "description",
-            render: (description) => description ? (description.length > 50 ? description.substring(0, 50) + '...' : description) : '-'
-        },
-        {
-            title: "Price (€)",
-            dataIndex: "price",
-            key: "price",
-            sorter: (a, b) => (a.price || 0) - (b.price || 0),
-            align: 'right',
-            render: (price, record) => {
-                if (editingId === record.id) {
-                    return (
-                        <Space>
-                            <InputNumber
-                                min={0}
-                                value={editingPrice}
-                                onChange={setEditingPrice}
-                                formatter={value => `€ ${value}`}
-                                parser={value => value.replace('€ ', '')}
-                                className={styles.priceInput}
-                            />
-                            <Button 
-                                type="primary" 
-                                size="small" 
-                                icon={<CheckOutlined />}
-                                onClick={() => handleSavePrice(record.id, editingPrice)}
-                            />
-                            <Button 
-                                size="small" 
-                                icon={<CloseOutlined />}
-                                onClick={handleCancelEdit}
-                            />
-                        </Space>
-                    );
-                }
-                return price ? (
-                    <Text strong className={`${styles.priceText} ${styles.clickablePrice}`} onClick={() => handleEditPrice(record)}>
-                        € {price}
-                    </Text>
-                ) : '-'
-            }
-        },
-        {
-            title: "Status",
-            key: "status",
-            filters: [
-                { text: 'Available', value: 'available' },
-                { text: 'Sold', value: 'sold' },
-            ],
-            onFilter: (value, record) => {
-                if (value === 'available') return !record.buyerId;
-                if (value === 'sold') return !!record.buyerId;
-                return true;
-            },
-            render: (_, record) => {
-                if (record.buyerId) {
-                    return <Tag color="red">Sold</Tag>
-                } else {
-                    return <Tag color="green">Available</Tag>
-                }
-            }
-        },
-        {
-            title: "Date",
-            dataIndex: "date",
-            key: "date",
-            sorter: (a, b) => (a.date || 0) - (b.date || 0),
-            render: (date) => timestampToString(date)
-        },
-        {
-            title: "Buyer",
-            key: "buyer",
-            render: (_, record) => {
-                if (record.buyerId) {
-                    return <Link href={`user/${record.buyerId}`}>{record.buyerEmail || `User #${record.buyerId}`}</Link>
-                }
-                return '-'
-            }
-        },
-        {
-            title: "Actions",
-            key: "actions",
-            render: (_, record) => 
-                <Space>
-                    <Link href={`editProduct/${record.id}`} passHref>
-                        <Button type="link" size="small" icon={<EditOutlined />} />
-                    </Link>
-                    <Button 
-                        type="link" 
-                        size="small" 
-                        danger 
-                        icon={<DeleteOutlined />}
-                        onClick={() => deleteProduct(record.id)}
-                    />
-                </Space>
-        },
-    ]
-
-    return (
-        <div>
-            <Space align="center" className={styles.header}>
-                <ShoppingOutlined className={styles.headerIcon} />
-                <Title level={2} className={styles.headerTitle}>My Products</Title>
-            </Space>
-
-            <Row gutter={[16, 16]} className={styles.statisticsRow}>
-                <Col xs={24} sm={12} md={8}>
-                    <Card>
-                        <Statistic title="Total Products" value={totalProducts} prefix={<ShoppingOutlined />} />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8}>
-                    <Card>
-                        <Statistic title="Products Sold" value={soldProducts} prefix={<DollarOutlined />} valueStyle={{ color: '#cf1322' }} />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={12} md={8}>
-                    <Card>
-                        <Statistic title="Products Available" value={availableProducts} prefix={<ShoppingOutlined />} valueStyle={{ color: '#52c41a' }} />
-                    </Card>
-                </Col>
-            </Row>
-
-            {products.length === 0 ? (
-                <Card>
-                    <Empty 
-                        description="You have no registered products for sale."
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
-                </Card>
-            ) : (
-                <Table 
-                    columns={columns} 
-                    dataSource={products}
-                    pagination={{ pageSize: 10 }}
-                    scroll={{ x: true }}
-                />
-            )}
+  const columns = [
+    // {
+    //   title: "Id",
+    //   dataIndex: "id",
+    //   key: "id",
+    //   width: 80,
+    // },
+    {
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      sorter: (a, b) => (a.title || '').localeCompare(b.title || ''),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className={styles.filterDropdown}>
+          <Input
+            placeholder="Search title"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={confirm}
+          />
+          <Space>
+            <Button type="primary" onClick={confirm} size="small">Search</Button>
+            <Button onClick={clearFilters} size="small">Reset</Button>
+          </Space>
         </div>
-    )
-}
+      ),
+      onFilter: (value, record) => record.title?.toLowerCase().includes(value.toLowerCase()),
+      render: (text, record) => <Link href={`/detailProduct/${record.id}`}>{text || '-'}</Link>
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      render: (desc) => {
+        if (!desc) return '-';
+        return desc.length > 50 ? `${desc.substring(0, 50)}...` : desc;
+      }
+    },
+    {
+      title: "Price (€)",
+      key: "price",
+      align: 'right',
+      sorter: (a, b) => (a.price || 0) - (b.price || 0),
+      render: (_, product) => (
+        <PriceEditor
+          product={product}
+          isEditing={editingId === product.id}
+          editPrice={editPrice}
+          onEdit={() => startEdit(product)}
+          onSave={() => savePrice(product)}
+          onCancel={cancelEdit}
+          onChange={setEditPrice}
+        />
+      )
+    },
+    {
+      title: "Status",
+      key: "status",
+      width: 120,
+      filters: [
+        { text: 'Available', value: false },
+        { text: 'Sold', value: true },
+      ],
+      onFilter: (value, record) => !!record.buyerId === value,
+      render: (_, record) => (
+        record.buyerId 
+          ? <Tag color="red" className={styles.tagStatus}>Sold</Tag>
+          : <Tag color="green" className={styles.tagStatus}>Available</Tag>
+      )
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      sorter: (a, b) => (a.date || 0) - (b.date || 0),
+      render: (date) => date ? timestampToString(date) : '-'
+    },
+    {
+      title: "Buyer",
+      key: "buyer",
+      render: (_, record) => {
+        if (!record.buyerId) return '-';
+        return (
+          <Link href={`/user/${record.buyerId}`}>
+            {record.buyerEmail || `User #${record.buyerId}`}
+          </Link>
+        );
+      }
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 100,
+      render: (_, product) => (
+        <Space size="small">
+          <Link href={`/editProduct/${product.id}`}>
+            <Button type="link" size="small" icon={<EditOutlined />} />
+          </Link>
+          <Button 
+            type="link" 
+            size="small" 
+            danger 
+            icon={<DeleteOutlined />}
+            onClick={() => deleteProduct(product)}
+          />
+        </Space>
+      )
+    },
+  ];
+
+  const productStats = useMemo(() => [
+    {
+      title: "Total Products",
+      value: products.length,
+      prefix: <ShoppingOutlined />,
+    },
+    {
+      title: "Sold",
+      value: products.filter(p => p.buyerId).length,
+      prefix: <DollarOutlined />,
+      valueStyle: { color: '#cf1322' }
+    },
+    {
+      title: "Available",
+      value: products.filter(p => !p.buyerId).length,
+      prefix: <ShoppingOutlined />,
+      valueStyle: { color: '#52c41a' }
+    }
+  ], [products]);
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div>
+      <Space align="center" className={styles.header}>
+        <ShoppingOutlined className={styles.headerIcon} />
+        <Title level={2} className={styles.headerTitle}>My Products</Title>
+      </Space>
+
+      <StatisticsCard 
+        stats={productStats}
+        className={styles.statisticsRow}
+        loading={loading} // Pasar el estado de carga
+      />
+
+      {products.length === 0 && !loading ? (
+        <Card>
+          <Empty 
+            description="You have no products for sale."
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        </Card>
+      ) : (
+        <Table 
+          columns={columns} 
+          dataSource={products}
+          loading={loading}
+          pagination={{ pageSize: 10, showSizeChanger: true }}
+          scroll={{ x: true }}
+        />
+      )}
+
+      {contextHolderModal}
+    </div>
+  );
+};
 
 export default ListMyProductsComponent;

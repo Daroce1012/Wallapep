@@ -4,17 +4,17 @@
 
 .userCol {
   display: flex;
-  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .userInfo {
   background-color: #ff0000;
   vertical-align: middle;
-  margin-top: 12px;
 }
 
 .loginText {
-  color: #ffffff;
+  color: white;
 }
 
 .content {
@@ -33,6 +33,35 @@
 }
 
 .footerText {
-  color: #9ca3af;
+  color: #ffffff;
+}
+
+.header .ant-menu-item .ant-menu-title-content {
+  font-weight: bold;
+}
+
+.header .ant-menu-item-selected:not(.ant-menu-item-only-child),
+.header .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.header .ant-menu-item-selected .ant-menu-title-content {
+  font-weight: bold;
+  color: white !important;
+}
+
+.header .ant-menu-item-selected .anticon {
+  color: white !important;
+}
+
+.header .logoLink {
+  /* Asegurar que el logo no tenga fondo azul ni texto negrita */
+  background-color: transparent !important;
+}
+
+.header .logoLink .ant-menu-title-content {
+  font-weight: normal !important;
+  color: white !important;
 }
 

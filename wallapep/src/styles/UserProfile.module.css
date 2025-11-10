@@ -1,2 +1,40 @@
-/* UserProfile styles */
+.profileContainer {
+
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 0;
+
+}
+
+
+
+.profileBanner {
+
+  margin-bottom: -100px;
+
+}
+
+
+
+.profileCard {
+
+  border-radius: 8px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+}
+
+
+
+@media (max-width: 992px) {
+
+  .profileBanner {
+
+    margin-bottom: 0;
+
+  }
+
+}
 

@@ -9,34 +9,13 @@ export const categoryLabels = {
   'planta': { label: 'Plant', emoji: '🌿' },
 };
 
-export let category =[
-  {
-    value: 'fashion',
-    label: '🛍️ Fashion',
-  },
-  {
-    value: 'technology',
-    label: '📱 Technology',
-  },
-  {
-    value: 'home',
-    label: '🏠 Home',
-  },
-  {
-    value: 'sports',
-    label: '🚴 Sports',
-  },
-  {
-    value: 'kids',
-    label: '👶 Kids',
-  },
-  {
-    value: 'consola',
-    label: '🎮 Console',
-  },
-  {
-    value: 'planta',
-    label: '🌿 Plant',
-  }
-];
+export const getCategoriesForSelect = () => {
+    // Excluir la categoría 'todos' que es solo para filtros generales
+    return Object.keys(categoryLabels)
+        .filter(key => key !== 'todos')
+        .map(key => ({
+            value: key,
+            label: `${categoryLabels[key].emoji} ${categoryLabels[key].label}`,
+        }));
+};
 

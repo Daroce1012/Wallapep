@@ -43,3 +43,10 @@
   cursor: pointer;
 }
 
+.tagStatus {
+  width: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+

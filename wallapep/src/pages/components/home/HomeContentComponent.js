@@ -1,53 +1,76 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Spin } from 'antd';
 import HeroSection from './HeroSection';
 import CategoriesSection from './CategoriesSection';
 import ProductsGrid from './ProductsGrid';
-import { apiGet } from '../../../utils/UtilsApi';
+import { apiGet, getApiKey } from '../../../utils/UtilsApi';
 import { processProductsImages } from '../../../utils/UtilsProducts';
-import styles from '../../../styles/HomeContent.module.css';
+import styles from '../../../styles/Home.module.css';
 
-let HomeContentComponent = () => {
-  let [selectedCategory, setSelectedCategory] = useState('todos');
-  let [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  let [products, setProducts] = useState([]);
+const HomeContentComponent = () => {
+  const [selectedCategory, setSelectedCategory] = useState('todos');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkUserLoggedIn();
+  // Calcular si está logueado (no necesita estado)
+  const isUserLoggedIn = useMemo(() => {
+    const apiKey = getApiKey();
+    return apiKey && apiKey !== "null";
   }, []);
+
+  // Calcular conteos por categoría desde los productos que ya tenemos
+  const categoriesCount = useMemo(() => {
+    const counts = {};
+    products.forEach(p => {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+    return counts;
+  }, [products]);
 
   useEffect(() => {
     if (isUserLoggedIn) {
       loadProducts();
+    } else {
+      setLoading(false);
     }
   }, [isUserLoggedIn]);
 
-  let checkUserLoggedIn = () => {
-    let apiKey = localStorage.getItem("apiKey");
-    let loggedIn = apiKey !== null && apiKey !== "" && apiKey !== "null";
-    setIsUserLoggedIn(loggedIn);
-  };
-
-  let loadProducts = async () => {
-    if (!isUserLoggedIn) {
-      return;
-    }
-
-    let jsonData = await apiGet("/products");
-    if (jsonData) {
-      let productsWithImage = await processProductsImages(jsonData);
-      setProducts(productsWithImage);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGet("/products");
+      if (data) {
+        const productsWithImage = await processProductsImages(data);
+        setProducts(productsWithImage);
+      }
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className={styles.homeContentContainer}>
+        <HeroSection />
+        <div className={styles.homeLoadingContainer}>
+          <Spin size="large" tip="Loading products..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.homeContentContainer}>
       <HeroSection />
+      
       <CategoriesSection
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
-        isUserLoggedIn={isUserLoggedIn}
-        products={products}
+        categoriesCount={categoriesCount}
       />
+      
       <ProductsGrid
         selectedCategory={selectedCategory}
         isUserLoggedIn={isUserLoggedIn}

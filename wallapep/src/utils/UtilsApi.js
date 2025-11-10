@@ -24,53 +24,51 @@ export const getApiHeaders = (includeApiKey = true, contentType = 'application/j
   return headers;
 };
 
-export const checkURL = async (url) => {
-  try {
-    let response = await fetch(url);
-    return response.ok;
-  } catch (error) {
-    return false;
+const executeApiCall = async (method, endpoint, options = {}) => {
+  let baseUrl = getBackendBaseUrl();
+  if (!baseUrl) {
+    throw new Error('Backend base URL is not configured. Please set NEXT_PUBLIC_BACKEND_BASE_URL in your .env file.');
   }
-};
+  
+  let url = baseUrl + endpoint;
+  
+  if (!url || url === 'undefined' || url.startsWith('undefined')) {
+    throw new Error(`Invalid URL: ${url}. Check NEXT_PUBLIC_BACKEND_BASE_URL environment variable.`);
+  }
 
-export const apiGet = async (endpoint, options = {}) => {
+  if (options.params) {
+    let queryString = new URLSearchParams(options.params).toString();
+    url += (url.includes('?') ? '&' : '?') + queryString;
+  }
+
+  let headers = options.headers || getApiHeaders(options.includeApiKey !== false, options.contentType);
+  let body = options.body;
+
+  if (body instanceof FormData) {
+    // FormData automáticamente establece Content-Type, así que lo eliminamos si está presente
+    let { 'Content-Type': _, ...headersWithoutContentType } = headers;
+    headers = headersWithoutContentType;
+  } else if (body && typeof body === 'object' && headers['Content-Type'] === 'application/json') {
+    body = JSON.stringify(body);
+  }
+  
   try {
-    let baseUrl = getBackendBaseUrl();
-    if (!baseUrl) {
-      throw new Error('Backend base URL is not configured. Please set NEXT_PUBLIC_BACKEND_BASE_URL in your .env file.');
-    }
-    
-    let url = baseUrl + endpoint;
-    
-    if (!url || url === 'undefined' || url.startsWith('undefined')) {
-      throw new Error(`Invalid URL: ${url}. Check NEXT_PUBLIC_BACKEND_BASE_URL environment variable.`);
-    }
-    
-    if (options.params) {
-      let queryString = new URLSearchParams(options.params).toString();
-      url += (url.includes('?') ? '&' : '?') + queryString;
-    }
-    
-    let headers = options.headers || getApiHeaders(options.includeApiKey !== false);
-    console.log("API GET URL header:", headers);
-    let response = await fetch(url, {
-      method: 'GET',
-      headers: headers
+    const response = await fetch(url, {
+      method: method,
+      headers: headers,
+      body: body
     });
-    
+
     if (response.ok) {
-      var responseBody = await response.json();
-      return responseBody;
-      
+      return await response.json();
     } else {
       await handleApiError(response, options.onError);
       return null;
     }
   } catch (error) {
-    console.error(`Error in API GET ${endpoint}:`, error);
-    
+    console.error(`Error in API ${method} ${endpoint}:`, error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      let errorMessage = 'Network error: Could not connect to the backend. Please check if the backend server is running and NEXT_PUBLIC_BACKEND_BASE_URL is correctly configured.';
+      const errorMessage = 'Network error: Could not connect to the backend. Please check if the backend server is running and NEXT_PUBLIC_BACKEND_BASE_URL is correctly configured.';
       console.error(errorMessage);
       if (options.onError) {
         options.onError([{ msg: errorMessage }]);
@@ -82,89 +80,103 @@ export const apiGet = async (endpoint, options = {}) => {
   }
 };
 
+export const apiGet = async (endpoint, options = {}) => {
+  return executeApiCall('GET', endpoint, options);
+};
+
 export const apiPost = async (endpoint, body, options = {}) => {
-  try {
-    let url = getBackendBaseUrl() + endpoint;
-    let headers = options.headers;
-    
-    if (!headers) {
-      headers = getApiHeaders(options.includeApiKey !== false);
-    }
-    
-    if (body instanceof FormData) {
-      let { 'Content-Type': _, ...headersWithoutContentType } = headers;
-      headers = headersWithoutContentType;
-    }
-    
-    let response = await fetch(url, {
-      method: 'POST',
-      headers: headers,
-      body: body instanceof FormData ? body : JSON.stringify(body)
-    });
-    
-    if (response.ok) {
-      return await response.json();
-    } else {
-      await handleApiError(response, options.onError);
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error in API POST ${endpoint}:`, error);
-    if (options.onError) {
-      options.onError(error);
-    }
-    return null;
-  }
+  return executeApiCall('POST', endpoint, { ...options, body });
 };
 
 export const apiPut = async (endpoint, body, options = {}) => {
-  try {
-    let url = getBackendBaseUrl() + endpoint;
-    let headers = options.headers || getApiHeaders(options.includeApiKey !== false);
-    
-    let response = await fetch(url, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify(body)
-    });
-    
-    if (response.ok) {
-      return await response.json();
-    } else {
-      await handleApiError(response, options.onError);
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error in API PUT ${endpoint}:`, error);
-    if (options.onError) {
-      options.onError(error);
-    }
-    return null;
-  }
+  return executeApiCall('PUT', endpoint, { ...options, body });
 };
 
 export const apiDelete = async (endpoint, options = {}) => {
+  return executeApiCall('DELETE', endpoint, options);
+};
+
+export const fetchUserCounts = async (userId) => {
   try {
-    let url = getBackendBaseUrl() + endpoint;
-    let headers = options.headers || getApiHeaders(options.includeApiKey !== false);
-    
-    let response = await fetch(url, {
-      method: 'DELETE',
-      headers: headers
-    });
-    
-    if (response.ok) {
-      return await response.json();
+    const [sales, purchases, productsData] = await Promise.all([
+      apiGet("/transactions/public", { params: { sellerId: userId } }),
+      apiGet("/transactions/public", { params: { buyerId: userId } }),
+      apiGet("/products", { params: { sellerId: userId } })
+    ]);
+
+    let allTransactions = [];
+    let salesCount = 0;
+    let purchasesCount = 0;
+
+    if (sales) {
+      allTransactions = [...allTransactions, ...sales];
+      salesCount = sales.length;
+    }
+
+    if (purchases) {
+      allTransactions = [...allTransactions, ...purchases];
+      purchasesCount = purchases.length;
+    }
+
+    // Remove duplicates based on transaction id
+    let uniqueTransactions = allTransactions.filter((transaction, index, self) =>
+      index === self.findIndex(t => t.id === transaction.id)
+    );
+
+    let productsCount = productsData ? productsData.length : 0;
+
+    return {
+      transactionsCount: uniqueTransactions.length,
+      totalSales: salesCount,
+      totalPurchases: purchasesCount,
+      productsCount: productsCount,
+    };
+  } catch (error) {
+    console.error("Error loading user counts:", error);
+    return {
+      transactionsCount: 0,
+      totalSales: 0,
+      totalPurchases: 0,
+      productsCount: 0,
+    };
+  }
+};
+
+export const fetchUserTransactions = async () => {
+  try {
+    const data = await apiGet("/transactions/own");
+    if (data) {
+      return data.map(t => ({
+        ...t,
+        key: t.tid || t.id
+      }));
     } else {
-      await handleApiError(response, options.onError);
-      return null;
+      return [];
     }
   } catch (error) {
-    console.error(`Error in API DELETE ${endpoint}:`, error);
-    if (options.onError) {
-      options.onError(error);
+    console.error("Error loading user transactions:", error);
+    return [];
+  }
+};
+
+export const fetchProducts = async (sellerId = null) => {
+  try {
+    let endpoint = "/products";
+    let options = {};
+    if (sellerId) {
+      options.params = { sellerId: sellerId };
+    } else {
+      endpoint = "/products/own/";
     }
-    return null;
+    const data = await apiGet(endpoint, options);
+    if (data) {
+      return data.map(p => ({ ...p, key: p.id }));
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error loading products:", error);
+    return [];
   }
 };
 

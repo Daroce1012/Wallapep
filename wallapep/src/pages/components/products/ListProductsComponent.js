@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Typography, Row, Col, Tag, Space, Modal, message, Spin } from 'antd';
+import { Typography, Row, Col, Tag, Space, Modal, message, Spin, Button } from 'antd';
 import { ShoppingOutlined } from '@ant-design/icons';
 import ProductFiltersComponent from './ProductFiltersComponent';
 import { getUserInfoFromApiKey } from '../../../utils/UtilsUser';
@@ -7,12 +7,16 @@ import { apiGet, apiPost } from '../../../utils/UtilsApi';
 import { processProductsImages } from '../../../utils/UtilsProducts';
 import styles from '../../../styles/ListProducts.module.css';
 import ProductCard from '../common/ProductCard';
+import CardHeader from '../common/CardHeader';
+import EmptyState from '../common/EmptyState';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const { Title, Paragraph } = Typography;
 
 const ListProductsComponent = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [productLoadError, setProductLoadError] = useState(null); // Nuevo estado de error
   const [userInfo, setUserInfo] = useState(null);
   const [filters, setFilters] = useState({
     category: 'todos',
@@ -62,13 +66,18 @@ const ListProductsComponent = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
+      setProductLoadError(null); // Resetear error al cargar
       const jsonData = await apiGet("/products");
       if (jsonData) {
         const productsWithImage = await processProductsImages(jsonData);
         setProducts(productsWithImage);
+      } else {
+        // Si jsonData es null, significa que hubo un error en la API o no se devolvieron datos
+        setProductLoadError("Failed to retrieve products.");
       }
     } catch (err) {
-      message.error("Error loading products");
+      console.error("Error loading products:", err);
+      setProductLoadError("Failed to load products. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -112,18 +121,37 @@ const ListProductsComponent = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <Spin size="large" tip="Loading products..." />
-      </div>
+      <LoadingSpinner tip="Loading products..." />
+    );
+  }
+
+  // Mostrar estado de error si no hay productos y hay un error de carga
+  if (productLoadError) {
+    return (
+      <EmptyState
+        description={productLoadError}
+        title="Error loading products"
+        action={(
+          <Button 
+            size="small" 
+            danger 
+            onClick={loadProducts}
+          >
+            Retry
+          </Button>
+        )}
+      />
     );
   }
 
   return (
     <div>
-      <Space align="center" className={styles.header}>
-        <ShoppingOutlined className={styles.headerIcon} />
-        <Title level={2} className={styles.headerTitle}>Products</Title>
-      </Space>
+      <CardHeader 
+        icon={<ShoppingOutlined className={styles.headerIcon} />} 
+        title="Products" 
+        level={2}
+        className={styles.header}
+      />
       
       <ProductFiltersComponent 
         filters={filters} 
@@ -137,13 +165,14 @@ const ListProductsComponent = () => {
       </div>
 
       {filteredProducts.length === 0 ? (
-        <div className={styles.emptyState}>
-          <Paragraph>No products found with the selected filters.</Paragraph>
-        </div>
+        <EmptyState 
+          description="No products found with the selected filters." 
+          className={styles.emptyState}
+        />
       ) : (
         <Row gutter={[16, 16]}>
           {filteredProducts.map((product) => (
-            <Col xs={24} sm={12} md={8} lg={8} xl={4} key={product.id}>
+            <Col xs={24} sm={12} md={8} lg={8} xl={3} key={product.id}>
               <ProductCard
                 product={product}
                 variant="compact"

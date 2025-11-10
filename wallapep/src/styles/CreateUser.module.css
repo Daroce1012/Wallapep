@@ -1,21 +1,76 @@
-.container {
-  min-height: 80vh;
+.pageContainer {
+  padding: 0px 20px; /* Eliminar padding superior e inferior, mantener lateral */
+  /* Light gray background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.card {
+.container {
   width: 100%;
-  margin: 15px;
+}
+
+.modernCard {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 10px 15px 0px 15px; /* Further reduced top padding */
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.headerIcon {
+  font-size: 38px;
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.title {
+  color: #333;
+  margin-bottom: 3px;
+  font-size: 24px !important;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 14px;
+}
+
+.modernForm .ant-form-item-label > label {
+  font-size: 13px;
+  color: #555;
+}
+
+.modernForm .ant-form-item {
+  margin-bottom: 8px; /* Further reduced space between items */
+}
+
+.submitButton {
+  height: 40px;
+  font-size: 16px;
+  border-radius: 6px;
+}
+
+.signInLink {
+  text-align: center;
+  margin-top: 0px; /* Ensure no top margin */
+  font-size: 13px;
+}
+
+.loginLink {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.loginLink:hover {
+  color: #40a9ff; /* Lighter shade on hover */
 }
 
 .flagImage {
   width: 20px;
   height: 15px;
   object-fit: cover;
-}
-
-.helperText {
-  font-size: 12px;
-  display: block;
-  margin-top: 4px;
 }
 

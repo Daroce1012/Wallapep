@@ -3,6 +3,7 @@ import { Row, Col, Typography, Empty } from 'antd';
 import { categoryLabels } from '../../../utils/UtilsCategories';
 import styles from '../../../styles/Home.module.css';
 import ProductCard from '../common/ProductCard'; // Importar el nuevo componente
+import EmptyState from '../common/EmptyState';
 
 const { Title, Text } = Typography;
 
@@ -23,14 +24,8 @@ const ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
   if (!isUserLoggedIn) {
     return (
       <div className={styles.productsContainer}>
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
-            <Text type="secondary" className={styles.emptyStateText}>
-              Please log in to view products
-            </Text>
-          }
-          className={styles.emptyState}
+        <EmptyState
+          description="Please log in to view products"
         />
       </div>
     );
@@ -51,14 +46,10 @@ const ProductsGrid = ({ selectedCategory, isUserLoggedIn, products }) => {
         </div>
 
         {filteredProducts.length === 0 ? (
-          <Empty
+          <EmptyState
             image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
             imageStyle={{ height: 120 }}
-            description={
-              <Text type="secondary" className={styles.emptyStateText}>
-                No products available in this category
-              </Text>
-            }
+            description="No products available in this category"
             className={styles.emptyStateWithBorder}
           />
         ) : (

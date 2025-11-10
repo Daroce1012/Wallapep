@@ -1,20 +1,13 @@
+/* Estilos específicos para la página de listado de mis productos */
+
 .header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.headerIcon {
-  font-size: 24px;
-  color: #1890ff;
-}
-
-.headerTitle {
-  margin: 0;
+  composes: header from './list-common.module.css';
+  /* Ajustado de 16px a 12px */
+  margin-bottom: 12px;
 }
 
 .statisticsRow {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .filterDropdown {
@@ -37,10 +30,6 @@
 .priceText {
   color: #1890ff;
   font-size: 16px;
-}
-
-.clickablePrice {
-  cursor: pointer;
 }
 
 .tagStatus {

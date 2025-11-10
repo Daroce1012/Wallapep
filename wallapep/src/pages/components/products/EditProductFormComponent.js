@@ -3,10 +3,15 @@ import { Card, Input, Button, Row, Col, Form, Typography, DatePicker, message, S
 import dayjs from "dayjs"; // Importar dayjs
 import { apiGet, apiPut } from '../../../utils/UtilsApi';
 import styles from '../../../styles/EditProductForm.module.css';
+import CardHeader from '../common/CardHeader';
+import buttonStyles from '../../../styles/buttons.module.css';
+import LoadingSpinner from '../common/LoadingSpinner';
+import EmptyState from '../common/EmptyState';
 
 let EditProductFormComponent = ({id, openNotification}) => {
     const [form] = Form.useForm();
     let [loading, setLoading] = useState(true);
+    let [productError, setProductError] = useState(null);
 
     useEffect(() => {
         getProduct(id);
@@ -14,22 +19,30 @@ let EditProductFormComponent = ({id, openNotification}) => {
 
     let getProduct = async (id) => {
         setLoading(true);
-        let jsonData = await apiGet(`/products/${id}`);
-        if (jsonData) {
-            // Convertir timestamp a objeto dayjs para DatePicker
-            if (jsonData.date) {
-                jsonData.date = dayjs.unix(jsonData.date); // Convertir segundos a dayjs
+        setProductError(null);
+        try {
+            let jsonData = await apiGet(`/products/${id}`);
+            if (jsonData) {
+                if (jsonData.date) {
+                    jsonData.date = dayjs(jsonData.date); 
+                }
+                form.setFieldsValue(jsonData); 
+            } else {
+                setProductError("Product not found or failed to load.");
             }
-            form.setFieldsValue(jsonData); // Inicializar el formulario con los datos del producto
+        } catch (error) {
+            console.error("Error loading product for editing:", error);
+            setProductError("Failed to load product details. Please try again.");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     let clickEditProduct = async (values) => {
         // Convertir el objeto dayjs de DatePicker de nuevo a timestamp (segundos)
         const productData = { ...values };
         if (productData.date) {
-            productData.date = productData.date.unix(); // Convertir dayjs a timestamp (segundos)
+            productData.date = productData.date.unix(); 
         }
 
         let result = await apiPut(`/products/${id}`, productData, {
@@ -49,17 +62,33 @@ let EditProductFormComponent = ({id, openNotification}) => {
     }
 
     if (loading) {
+        return <LoadingSpinner tip="Loading product details..." />;
+    }
+
+    if (productError) {
         return (
-            <Row align="middle" justify="center" className={styles.container}>
-                <Col><Spin size="large" /></Col>
-            </Row>
+            <EmptyState
+                description={productError}
+                title="Error loading product"
+                action={
+                    <Button 
+                        size="small" 
+                        danger 
+                        onClick={() => getProduct(id)}
+                    >
+                        Retry
+                    </Button>
+                }
+            />
         );
     }
 
     return (
         <Row align="middle" justify="center" className={styles.container}>
             <Col>
-                <Card title="Edit product" className={styles.card}>
+                <Card 
+                    title={<CardHeader title="Edit product" />} 
+                    className={styles.card}>
                     <Form 
                         form={form}
                         layout="vertical"
@@ -75,29 +104,36 @@ let EditProductFormComponent = ({id, openNotification}) => {
                             <Input.TextArea size="large" placeholder="description" />
                         </Form.Item>
 
-                        <Form.Item label="Price" name="price"
-                            rules={[
-                                { required: true, message: "Price is required" },
-                                { type: 'number', min: 0.01, message: "Price must be a positive number" },
-                            ]}>
-                            <InputNumber
-                                min={0.01}
-                                className={styles.priceInput}
-                                size="large"
-                                placeholder="price"
-                                formatter={value => value ? `€ ${value}` : ''}
-                                parser={value => value.replace('€ ', '')}
-                            />
-                        </Form.Item>
+                        {/* Price and Date */}
+                        <Row gutter={16}>
+                            <Col xs={24} sm={12}>
+                                <Form.Item label="Price" name="price"
+                                    rules={[
+                                        { required: true, message: "Price is required" },
+                                        { type: 'number', min: 0.01, message: "Price must be a positive number" },
+                                    ]}>
+                                    <InputNumber
+                                        min={0.01}
+                                        className={styles.priceInput}
+                                        size="large"
+                                        placeholder="price"
+                                        formatter={value => value ? `€ ${value}` : ''}
+                                        parser={value => value.replace('€ ', '')}
+                                        style={{ width: '100%' }}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={12}>
+                                <Form.Item label="Date" name="date">
+                                    <DatePicker 
+                                        format="YYYY-MM-DD"
+                                        style={{ width: '100%' }}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                        <Form.Item label="Date" name="date">
-                            <DatePicker 
-                                format="YYYY-MM-DD HH:mm:ss"
-                                showTime
-                            />
-                        </Form.Item>
-
-                        <Button type="primary" htmlType="submit" block>
+                        <Button type="primary" htmlType="submit" block className={buttonStyles.primaryButton}>
                             Edit Product
                         </Button> 
                     </Form>

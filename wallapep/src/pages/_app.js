@@ -58,7 +58,6 @@ export default function App({ Component, pageProps }) {
         }
     }
 
-
     let disconnect = async () => {
         const result = await apiGet("/users/disconnect");
         if (result) { // Solo desconectar si la API responde exitosamente
@@ -67,7 +66,6 @@ export default function App({ Component, pageProps }) {
             router.push("/login")
         }
     }
-
 
   let callBackOnFinishLogin = (loginUser) => {
     console.log("Cambiado "+loginUser.email);
@@ -91,7 +89,6 @@ export default function App({ Component, pageProps }) {
       </Menu.Item>
     </Menu>
   );
-
 
   return (
     <Provider store={store}>

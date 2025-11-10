@@ -1,40 +1,126 @@
+/* Estilos para el perfil de usuario */
+
 .profileContainer {
-
-  max-width: 1400px;
-
-  margin: 0 auto;
-
-  padding: 0;
-
+  padding: 20px;
 }
-
-
 
 .profileBanner {
-
-  margin-bottom: -100px;
-
+  height: 200px;
+  background-color: var(--primary-light);
+  border-radius: 16px;
+  margin-bottom: -70px; /* Para que la tarjeta del perfil se superponga */
+  position: relative;
 }
 
-
+.profileBannerImage {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 8px 0 0;
+  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCkIv812LERa3nNohalzgOZbkdZeSv-TGZjLHIL_AEgCQulQ3X1EpOeZjBhPob2dg8AoXz-VZg_LlszVTqWPMaqx4ivuAzHjOk4-4jHQbho9LOLeezEvrgArUoAbQx6pgQn0gQZXgYOua6Zr97mU3DQgM7g0en8S-Ijy6eL1ImOWEvbjey5U8776uEfgTIPZp51TuP83Zve_3c_jBTOs3U8CLaGOvh19yeMqndtoPc2iniekQv0fIG1hi6wTON4MlmB6D5PPpOrMD6F")
+}
 
 .profileCard {
-
-  border-radius: 8px;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
+  composes: card from './base.module.css';
+  /* Los estilos específicos de profileCard se mantienen aquí si son diferentes o adicionales */
+  z-index: 1;
+  position: relative;
+  padding-top: 80px; /* Para hacer espacio para el avatar que se superpone */
 }
 
+.avatarContainer {
+  text-align: center;
+  position: relative;
+  top: -50px;
+}
 
+.profileAvatar {
+  border: 5px solid white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
 
-@media (max-width: 992px) {
+.userDetailsContainer {
+  margin-top: 16px;
+}
 
-  .profileBanner {
+.userNameTitle {
+  margin-bottom: 4px;
+  font-size: 2rem;
+  font-weight: bold;
+}
 
-    margin-bottom: 0;
+.userDescriptionParagraph {
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
 
-  }
+.userRatingStyle {
+  margin-bottom: 12px;
+}
 
+.userProductsParagraph {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.userInfoSpace {
+  width: 100%;
+  text-align: left;
+}
+
+.userInfoIcon {
+  font-size: 18px;
+  color: #1890ff;
+}
+
+.statsCard {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  margin-bottom: 24px;
+}
+
+.statisticValue {
+  font-size: 24px;
+}
+
+.avatarPlaceholder {
+  position: absolute;
+  top: -60px; /* Ajusta para que el avatar se superponga al banner */
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.userInfoSection {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.userName {
+  margin-top: 10px;
+}
+
+.userEmail {
+  color: var(--text-color-secondary);
+}
+
+.statisticsContainer {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f0f2f5;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.statisticItem {
+  padding: 8px 0;
+}
+
+.tabsContainer {
+  margin-top: 24px;
+}
+
+.tabContent {
+  padding: 24px 0;
 }
 

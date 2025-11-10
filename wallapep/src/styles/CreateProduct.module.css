@@ -1,6 +1,6 @@
 /* Contenedor principal */
 .container {
-  padding: 10px 20px; /* Reducido aún más el padding vertical */
+  /* Reducido aún más el padding vertical */
   background: none; /* Eliminar el fondo degradado */
   display: flex; /* Habilitar flexbox */
   justify-content: center; /* Centrar horizontalmente */

@@ -1,6 +1,18 @@
 // Utility functions for user information
 import { apiGet, getApiKey } from './UtilsApi';
 
+// Get user data by user ID from API. Returns Promise<Object|null>
+export let fetchUserById = async (userId) => {
+  if (!userId) return null;
+  try {
+    const userData = await apiGet(`/users/${userId}`);
+    return userData || null;
+  } catch (error) {
+    console.error(`Error loading user data for user ${userId}:`, error);
+    return null;
+  }
+};
+
 // Get user information from API key stored in localStorage. Returns Object with id and email, or null if not available
 export let getUserInfoFromApiKey = () => {
   const apiKey = getApiKey();
@@ -39,7 +51,7 @@ export let getUserEmailById = async (userId) => {
   
   // Si es otro usuario, obtener el email desde la API
   try {
-    const userData = await apiGet(`/users/${userId}`);
+    const userData = await fetchUserById(userId);
     return userData && userData.email ? userData.email : null;
   } catch (error) {
     console.error(`Error loading email for user ${userId}:`, error);

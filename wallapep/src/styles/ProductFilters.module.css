@@ -1,25 +1,37 @@
-.filtersCard {
+/* Estilos para el componente de filtros de producto */
+
+.filterCard {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
-.filtersForm {
+.filterForm {
+  padding: 16px;
+}
+
+.filterSpace > .ant-space-item {
   width: 100%;
-  justify-content: space-between;
 }
 
-.filtersSpace {
-  width: 100%;
+.categorySelect .ant-select-selector {
+  border-radius: 8px;
 }
 
-.categorySelect {
-  width: 150px;
-}
-
-.titleInput {
-  width: 200px;
+.titleInput .ant-input {
+  border-radius: 8px;
 }
 
 .priceInput {
-  width: 120px;
+  composes: priceInput from './list-common.module.css';
+}
+
+.priceInput .ant-input-number-handler-wrap {
+  border-radius: 0 8px 8px 0;
+}
+
+.filterButton {
+  border-radius: 8px;
+  height: 40px;
 }
 

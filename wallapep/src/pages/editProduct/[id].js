@@ -13,9 +13,6 @@ export default function EditProductPage() {
     <div>
       <h1>Editar producto {id}</h1>
       <EditProductFormComponent id = {id} />
-      <button type="button" onClick={clickReturn}>
-        Volver a productos
-      </button>
     </div>
   );
 }

@@ -3,39 +3,52 @@ import { useRouter } from "next/router";
 import {Card, Col, Row, Form, Input, Button , Typography, message } from "antd";
 import { apiPost } from '../../../utils/UtilsApi';
 import styles from '../../../styles/LoginForm.module.css';
+import CardHeader from '../common/CardHeader';
+import buttonStyles from '../../../styles/buttons.module.css';
 
 let LoginFormComponent = ({setLogin, openNotification}) => {
     const [form] = Form.useForm();
     let router = useRouter();
+    const [submitting, setSubmitting] = useState(false);
 
     let onFinish = async (values) => {
-        let responseBody = await apiPost("/users/login", values, {
-            includeApiKey: false, // No requiere API key para login
-            onError: (serverErrors) => {
-                serverErrors.forEach(error => {
-                    if (error.path) {
-                        form.setFields([{
-                            name: error.path,
-                            errors: [error.msg]
-                        }]);
-                    } else {
-                        // Para errores no relacionados con un campo específico
-                        if (openNotification) {
-                            openNotification("top", error.msg, "error");
+        setSubmitting(true);
+        try {
+            let responseBody = await apiPost("/users/login", values, {
+                includeApiKey: false, // No requiere API key para login
+                onError: (serverErrors) => {
+                    serverErrors.forEach(error => {
+                        if (error.path) {
+                            form.setFields([{
+                                name: error.path,
+                                errors: [error.msg]
+                            }]);
+                        } else {
+                            // Para errores no relacionados con un campo específico
+                            if (openNotification) {
+                                openNotification("top", error.msg, "error");
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            });
+    
+            if (responseBody) {
+                if (responseBody.apiKey && responseBody.email) {
+                    localStorage.setItem("apiKey", responseBody.apiKey);
+                    localStorage.setItem("email", responseBody.email);
+                }
+                setLogin(true);
+                openNotification("top", "Login successfull", "success");
+                router.push("/products");
             }
-        });
-
-        if (responseBody) {
-            if (responseBody.apiKey && responseBody.email) {
-                localStorage.setItem("apiKey", responseBody.apiKey);
-                localStorage.setItem("email", responseBody.email);
+        } catch (error) {
+            console.error("Login error:", error);
+            if (openNotification) {
+                openNotification("top", error.message || "An unexpected error occurred during login", "error");
             }
-            setLogin(true);
-            openNotification("top", "Login successfull", "success");
-            router.push("/products");
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -43,7 +56,10 @@ let LoginFormComponent = ({setLogin, openNotification}) => {
         <Row align="middle" justify="center" className={styles.container}>
             <Col xs={0} sm={0} md={12} lg={8} xl={6}><img src="/iniciar-sesion.png" width="100%" alt="Iniciar Sesión" /></Col>
             <Col xs={24} sm={24} md={12} lg={12} xl={10} >
-                <Card title="Login" className={styles.card}>
+                <Card 
+                    title={<CardHeader title="Login" />}
+                    className={styles.card}
+                >
                     <Form
                         form={form}
                         layout="vertical"
@@ -68,14 +84,21 @@ let LoginFormComponent = ({setLogin, openNotification}) => {
                         </Form.Item>
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" block>Login</Button>
+                            <Button 
+                                type="primary" 
+                                htmlType="submit" 
+                                block
+                                loading={submitting}
+                                className={buttonStyles.primaryButton}
+                            >
+                                Login
+                            </Button>
                         </Form.Item>
                     </Form>
                 </Card>
             </Col>
 
         </Row>
-
     )
 }
 

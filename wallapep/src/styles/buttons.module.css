@@ -1,0 +1,17 @@
+.primaryButton {
+  width: 100%;
+  height: 36px;
+  border-radius: 6px;
+  background-color: var(--primary);
+  color: white !important;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.primaryButton:hover {
+  background-color: #0d6edc;
+}

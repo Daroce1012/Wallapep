@@ -1,13 +1,16 @@
 import {useState, useEffect } from "react";
-import { Spin, Row, Col } from 'antd';
+import { Spin, Row, Col, Button } from 'antd';
 import Link from "next/link";
-import { apiGet } from '../../../utils/UtilsApi';
+import { apiGet, fetchProducts } from '../../../utils/UtilsApi';
 import ProductCard from '../common/ProductCard'; // Importar ProductCard
 import styles from '../../../styles/UserProducts.module.css';
+import LoadingSpinner from '../common/LoadingSpinner';
+import EmptyState from '../common/EmptyState';
 
 let UserProductsComponent = ({userId}) => {
     let [products, setProducts] = useState([])
     let [loading, setLoading] = useState(true)
+    let [productLoadError, setProductLoadError] = useState(null);
 
     useEffect(() => {
         if (userId) {
@@ -17,26 +20,46 @@ let UserProductsComponent = ({userId}) => {
 
     let loadProducts = async () => {
         setLoading(true);
+        setProductLoadError(null); // Resetear error al cargar
         try {
-            let jsonData = await apiGet("/products", {
-                params: { sellerId: userId }
-            });
+            let jsonData = await fetchProducts(userId);
             if (jsonData) {
                 setProducts(jsonData);
+            } else {
+                setProductLoadError("Failed to retrieve products for this user.");
             }
         } catch (error) {
             console.error("Error loading products:", error);
+            setProductLoadError("Failed to load user products. Please try again.");
         } finally {
             setLoading(false);
         }
     }
 
     if (loading) {
-        return <Spin size="large" style={{ display: 'block', margin: 'auto' }} />
+        return <LoadingSpinner tip="Loading user products..." />
+    }
+
+    if (productLoadError) {
+        return (
+            <EmptyState
+                description={productLoadError}
+                title="Error loading products"
+                action={(
+                    <Button 
+                        size="small" 
+                        danger 
+                        onClick={loadProducts}
+                    >
+                        Retry
+                    </Button>
+                )}
+            />
+        );
     }
 
     if (products.length === 0) {
-        return <p>No products for sale</p>
+        return <EmptyState description="No products for sale" />
     }
 
     return (

@@ -1,14 +1,17 @@
 import {useState, useEffect } from "react";
-import { Typography, Spin, Card, Row, Col, Space } from 'antd';
+import { Typography, Spin, Card, Row, Col, Space, Button } from 'antd';
 import Link from "next/link";
 import { apiGet } from '../../../utils/UtilsApi';
 import styles from '../../../styles/UserTransactionsCard.module.css';
+import LoadingSpinner from '../common/LoadingSpinner'; // Importar LoadingSpinner
+import EmptyState from '../common/EmptyState'; // Importar EmptyState
 
 const { Text, Title } = Typography;
 
 let UserTransactionsComponent = ({userId}) => {
     let [transactions, setTransactions] = useState([])
     let [loading, setLoading] = useState(true)
+    let [transactionLoadError, setTransactionLoadError] = useState(null); // Nuevo estado de error
 
     useEffect(() => {
         if (userId) {
@@ -18,6 +21,7 @@ let UserTransactionsComponent = ({userId}) => {
 
     let loadTransactions = async () => {
         setLoading(true);
+        setTransactionLoadError(null); // Resetear error al cargar
         try {
             let [sales, purchases] = await Promise.all([
                 apiGet("/transactions/public", { params: { sellerId: userId } }),
@@ -34,19 +38,41 @@ let UserTransactionsComponent = ({userId}) => {
             );
 
             setTransactions(uniqueTransactions);
+            if (!sales && !purchases) {
+                setTransactionLoadError("No transactions found for this user.");
+            }
         } catch (error) {
             console.error("Error loading transactions:", error);
+            setTransactionLoadError("Failed to load user transactions. Please try again.");
         } finally {
             setLoading(false);
         }
     }
 
     if (loading) {
-        return <Spin size="large" style={{ display: 'block', margin: 'auto' }} />
+        return <LoadingSpinner tip="Loading user transactions..." />;
+    }
+
+    if (transactionLoadError) {
+        return (
+            <EmptyState
+                description={transactionLoadError}
+                title="Error loading transactions"
+                action={(
+                    <Button 
+                        size="small" 
+                        danger 
+                        onClick={loadTransactions}
+                    >
+                        Retry
+                    </Button>
+                )}
+            />
+        );
     }
 
     if (transactions.length === 0) {
-        return <p>No transactions found.</p>
+        return <EmptyState description="No transactions found." />;
     }
 
     return (

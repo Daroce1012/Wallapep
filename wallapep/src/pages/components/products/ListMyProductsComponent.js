@@ -3,10 +3,13 @@ import { Table, Space, Typography, Input, Button, Tag, Card, Empty, Modal, messa
 import { ShoppingOutlined, EditOutlined, DeleteOutlined, DollarOutlined } from '@ant-design/icons';
 import Link from "next/link";
 import { timestampToString } from "../../../utils/UtilsDates";
-import { apiGet, apiDelete, apiPut } from '../../../utils/UtilsApi';
+import { apiGet, apiDelete, apiPut, fetchProducts } from '../../../utils/UtilsApi';
 import StatisticsCard from '../common/StatisticsCard'; // Ruta corregida
 import PriceEditor from './PriceEditor';
 import styles from '../../../styles/ListMyProducts.module.css';
+import CardHeader from '../common/CardHeader';
+import EmptyState from '../common/EmptyState';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const { Title } = Typography;
 
@@ -17,6 +20,7 @@ const { Title } = Typography;
 const ListMyProductsComponent = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [productLoadError, setProductLoadError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editPrice, setEditPrice] = useState(null);
   const [modal, contextHolderModal] = Modal.useModal();
@@ -28,10 +32,17 @@ const ListMyProductsComponent = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await apiGet("/products/own/");
+      setProductLoadError(null);
+      const data = await fetchProducts();
       if (data) {
-        setProducts(data.map(p => ({ ...p, key: p.id })));
+        setProducts(data);
+      } else {
+        // Considerar que `data` podría ser null si hay un error en la API pero la respuesta es 200
+        setProductLoadError("Failed to retrieve products.");
       }
+    } catch (error) {
+      console.error("Error loading products:", error);
+      setProductLoadError("Failed to load your products. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -60,6 +71,11 @@ const ListMyProductsComponent = () => {
     const result = await apiPut(`/products/${product.id}`, {
       ...product,
       price: editPrice
+    }, {
+      onError: (serverErrors) => {
+        const notificationMsg = serverErrors.map(e => e.msg).join(", ");
+        message.error(notificationMsg || "Failed to update price");
+      }
     });
     
     if (result) {
@@ -78,10 +94,18 @@ const ListMyProductsComponent = () => {
       okText: 'Delete',
       okType: 'danger',
       onOk: async () => {
-        const result = await apiDelete(`/products/${product.id}`);
+        const result = await apiDelete(`/products/${product.id}`, {
+          onError: (serverErrors) => {
+            const notificationMsg = serverErrors.map(e => e.msg).join(", ");
+            message.error(notificationMsg || "Failed to delete product");
+          }
+        });
         if (result?.deleted) {
           message.success("Product deleted");
           setProducts(prev => prev.filter(p => p.id !== product.id));
+        } else if (result !== null) {
+          // Si result no es null pero deleted es false, significa que la API respondió pero no se eliminó
+          message.error("Failed to delete product. Please try again.");
         }
       }
     });
@@ -225,12 +249,36 @@ const ListMyProductsComponent = () => {
   // RENDER
   // ============================================
 
+  if (loading) {
+    return <LoadingSpinner tip="Loading your products..." />;
+  }
+
+  if (productLoadError) {
+    return (
+      <EmptyState
+        description={productLoadError}
+        title="Error loading products"
+        action={
+          <Button 
+            size="small" 
+            danger 
+            onClick={loadProducts}
+          >
+            Retry
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div>
-      <Space align="center" className={styles.header}>
-        <ShoppingOutlined className={styles.headerIcon} />
-        <Title level={2} className={styles.headerTitle}>My Products</Title>
-      </Space>
+      <CardHeader 
+        icon={<ShoppingOutlined className={styles.headerIcon} />} 
+        title="My Products" 
+        level={2}
+        className={styles.header}
+      />
 
       <StatisticsCard 
         stats={productStats}
@@ -240,9 +288,8 @@ const ListMyProductsComponent = () => {
 
       {products.length === 0 && !loading ? (
         <Card>
-          <Empty 
+          <EmptyState 
             description="You have no products for sale."
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         </Card>
       ) : (

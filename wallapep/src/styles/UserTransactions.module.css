@@ -1,18 +1,40 @@
+/* Estilos para el listado de transacciones del usuario */
+
+/* Header de la sección */
+.header {
+  composes: header from './list-common.module.css';
+}
+
+.headerIcon {
+  composes: headerIcon from './list-common.module.css';
+}
+
+.headerTitle {
+  composes: headerTitle from './list-common.module.css';
+}
+
+/* Fila de estadísticas (si la hubiera en este componente, ajusta si no es aplicable) */
+.statisticsRow {
+  composes: statisticsRow from './list-common.module.css';
+}
+
+/* Dropdown de filtros */
 .filterDropdown {
-  padding: 8px;
+  composes: filterDropdown from './list-common.module.css';
 }
 
+/* Input de filtro */
 .filterInput {
-  margin-bottom: 8px;
-  display: block;
+  composes: filterInput from './list-common.module.css';
 }
 
+/* Botón de filtro */
 .filterButton {
-  width: 90px;
+  composes: filterButton from './list-common.module.css';
 }
 
+/* Texto de precio */
 .priceText {
-  color: #1890ff;
-  font-size: 16px;
+  composes: priceText from './list-common.module.css';
 }
 

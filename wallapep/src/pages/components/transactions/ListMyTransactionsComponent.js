@@ -12,9 +12,12 @@ import { categoryLabels } from "../../../utils/UtilsCategories";
 
 import { getUserIdFromApiKey, getUserEmailById } from '../../../utils/UtilsUser';
 
-import { apiGet } from '../../../utils/UtilsApi';
+import { apiGet, fetchUserTransactions } from '../../../utils/UtilsApi';
 
 import StatisticsCard from '../common/StatisticsCard';
+import LoadingSpinner from '../common/LoadingSpinner'; // Importar LoadingSpinner
+import EmptyState from '../common/EmptyState'; // Importar EmptyState
+import CardHeader from '../common/CardHeader'; // Importar CardHeader
 
 import styles from '../../../styles/ListMyTransactions.module.css';
 
@@ -210,27 +213,10 @@ const ListMyTransactionsComponent = () => {
 
       setLoading(true);
 
-      const data = await apiGet("/transactions/own");
-
+      const formattedTransactions = await fetchUserTransactions();
       
-
-      if (data) {
-
-        const formattedTransactions = data.map(t => ({
-
-          ...t,
-
-          key: t.tid || t.id
-
-        }));
-
-        
-
-        setTransactions(formattedTransactions);
-
-        loadUserEmails(data);
-
-      }
+      setTransactions(formattedTransactions);
+      loadUserEmails(formattedTransactions);
 
     } catch (error) {
 
@@ -512,11 +498,7 @@ const ListMyTransactionsComponent = () => {
 
     return (
 
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-
-        <Spin size="large" tip="Loading transactions..." />
-
-      </div>
+      <LoadingSpinner tip="Loading transactions..." />
 
     );
 
@@ -528,13 +510,12 @@ const ListMyTransactionsComponent = () => {
 
     <div>
 
-      <Space align="center" className={styles.header}>
-
-        <TransactionOutlined className={styles.headerIcon} />
-
-        <Title level={2} className={styles.headerTitle}>My Transactions</Title>
-
-      </Space>
+      <CardHeader 
+        icon={<TransactionOutlined className={styles.headerIcon} />} 
+        title="My Transactions" 
+        level={2} 
+        className={styles.header}
+      />
 
 
 
@@ -556,12 +537,9 @@ const ListMyTransactionsComponent = () => {
 
         <Card>
 
-          <Empty 
-
+          <EmptyState
             description="You have no registered transactions."
-
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-
           />
 
         </Card>

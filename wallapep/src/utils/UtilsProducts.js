@@ -3,7 +3,20 @@
  */
 
 import { getBackendBaseUrl } from './UtilsApi';
-import { checkURL } from './UtilsApi';
+
+/**
+ * Helper function to check if a URL exists.
+ * @param {string} url - The URL to check.
+ * @returns {Promise<boolean>} True if the URL returns a 2xx status, false otherwise.
+ */
+const checkURL = async (url) => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+};
 
 /**
  * Obtiene la URL de la imagen de un producto

@@ -1,21 +1,23 @@
+/* Estilos para la tarjeta de transacción en el perfil de usuario */
+
 .transactionCardLink {
   display: block;
+  width: 100%;
 }
 
 .transactionCard {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  composes: card from './base.module.css';
+  /* Los estilos específicos de transactionCard se mantienen aquí si son diferentes o adicionales */
   transition: all 0.3s;
 }
 
 .transactionCard:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .transactionTitle {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 8px;
+  font-size: 18px;
+  margin-bottom: 0;
+  color: var(--text-color);
 }

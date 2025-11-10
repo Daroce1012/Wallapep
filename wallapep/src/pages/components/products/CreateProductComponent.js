@@ -4,6 +4,8 @@ import { PlusOutlined, ShopOutlined } from '@ant-design/icons';
 import { getCategoriesForSelect } from "../../../utils/UtilsCategories";
 import { apiPost } from '../../../utils/UtilsApi';
 import styles from '../../../styles/CreateProduct.module.css';
+import CardHeader from '../common/CardHeader';
+import buttonStyles from '../../../styles/buttons.module.css';
 
 // Reglas de validación del formulario
 const FORM_RULES = {
@@ -138,10 +140,7 @@ const CreateProductComponent = ({ openNotification }) => {
         <Col xs={24} sm={24} md={24} lg={24} xl={24}>
           <Card
             title={
-              <Space size="middle">
-                <ShopOutlined className={styles.headerIcon} />
-                <span className={styles.headerTitle}>Create Product</span>
-              </Space>
+              <CardHeader icon={<ShopOutlined className={styles.headerIcon} />} title="Create Product" />
             }
             className={styles.card}
           >
@@ -230,7 +229,7 @@ const CreateProductComponent = ({ openNotification }) => {
                   size="large"
                   loading={submitting}
                   icon={<ShopOutlined />}
-                  className={styles.submitButton}
+                  className={`${styles.submitButton} ${buttonStyles.primaryButton}`}
                 >
                   {submitting ? 'Creating Product...' : 'Create Product'}
                 </Button>

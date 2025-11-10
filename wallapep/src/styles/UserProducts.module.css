@@ -1,19 +1,23 @@
+/* Estilos para el listado de productos del usuario */
+
+/* Dropdown de filtros */
 .filterDropdown {
-  padding: 8px;
+  composes: filterDropdown from './list-common.module.css';
 }
 
+/* Input de filtro */
 .filterInput {
-  margin-bottom: 8px;
-  display: block;
+  composes: filterInput from './list-common.module.css';
 }
 
+/* Botón de filtro */
 .filterButton {
-  width: 90px;
+  composes: filterButton from './list-common.module.css';
 }
 
+/* Texto de precio */
 .priceText {
-  color: #1890ff;
-  font-size: 16px;
+  composes: priceText from './list-common.module.css';
 }
 
 .tagStatus {

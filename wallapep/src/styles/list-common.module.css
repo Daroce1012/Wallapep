@@ -1,0 +1,40 @@
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.headerIcon {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.headerTitle {
+  margin: 0;
+}
+
+.statisticsRow {
+  margin-bottom: 24px;
+}
+
+.filterDropdown {
+  padding: 8px;
+}
+
+.filterInput {
+  margin-bottom: 8px;
+  display: block;
+}
+
+.filterButton {
+  width: 90px;
+}
+
+.priceInput {
+  width: 120px;
+}
+
+.priceText {
+  color: #1890ff;
+  font-size: 16px;
+}

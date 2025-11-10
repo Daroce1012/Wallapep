@@ -6,6 +6,8 @@ import { getUserIdFromApiKey } from '../../../utils/UtilsUser';
 import { apiGet, apiPost } from '../../../utils/UtilsApi';
 import { processProductImage } from '../../../utils/UtilsProducts';
 import styles from '../../../styles/DetailsProduct.module.css';
+import ReputationTags from '../common/ReputationTags';
+import buttonStyles from '../../../styles/buttons.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -170,17 +172,7 @@ const DetailsProductComponent = ({ id, openNotification }) => {
                                     </Link>
                                 </div>
                                 {seller.reputation && (
-                                    <div className={styles.reputationTags}>
-                                        <Tag color="gold" icon={<StarOutlined />}>
-                                            {seller.reputation.totalTransactions} transactions
-                                        </Tag>
-                                        <Tag color="green">
-                                            {seller.reputation.sales} sales
-                                        </Tag>
-                                        <Tag color="blue">
-                                            {seller.reputation.purchases} purchases
-                                        </Tag>
-                                    </div>
+                                    <ReputationTags reputation={seller.reputation} />
                                 )}
                             </div>
                         )}
@@ -200,7 +192,7 @@ const DetailsProductComponent = ({ id, openNotification }) => {
                             size="large"
                             disabled={!purchaseState.canBuy}
                             block
-                            className={styles.buyButton}
+                            className={`${styles.buyButton} ${buttonStyles.primaryButton}`}
                         >
                             {purchaseState.canBuy ? "Buy Now" : "Not Available"}
                         </Button>

@@ -1,8 +1,5 @@
-/* Estilos específicos para la página de listado de mis productos */
-
 .header {
   composes: header from './list-common.module.css';
-  /* Ajustado de 16px a 12px */
   margin-bottom: 12px;
 }
 
@@ -37,5 +34,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.priceLink {
+  cursor: pointer;
+  text-decoration: underline;
 }
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Input, Button, Row, Col, Form, Typography, DatePicker, Select, Space } from "antd";
+import { Card, Input, Button, Row, Col, Form, Typography, DatePicker, Select, Space, Radio } from "antd";
 import { UserAddOutlined, MailOutlined, LockOutlined, UserOutlined, IdcardOutlined, GlobalOutlined, HomeOutlined, CalendarOutlined } from '@ant-design/icons';
 import { countries } from "../../../utils/UtilsCountries";
 import { useRouter } from 'next/router';
@@ -12,7 +12,7 @@ const { Title, Text } = Typography;
 
 const DOCUMENT_TYPES = [
   { value: 'DNI', label: 'DNI' },
-  { value: 'Pasaporte', label: 'Pasaporte' },
+  { value: 'Passport', label: 'Passport' },
   { value: 'NIE', label: 'NIE' }
 ];
 
@@ -40,27 +40,29 @@ const CreateUserComponent = ({ openNotification }) => {
                 errors: [error.msg]
               }]);
             } else {
-              // openNotification?.("top", `Error: ${error.msg}`, "error");
+               if (openNotification) {
+                  openNotification("top", error.msg, "error");
+                }
             }
           });
         }
       });
 
       if (result) {
-        // Limpiar formulario
+        // Clear form
         form.resetFields();
         
-        // Redirigir después de 2 segundos
+        // Redirect after 2 seconds
         setTimeout(() => {
           router.push('/login');
-        }, 2000);
+        }, 500);
       }
     } catch (error) {
       console.error("Error creating user:", error);
     } finally {
-      setSubmitting(false); // Asegurarse de que el estado de envío se restablezca
+      setSubmitting(false); // Ensure submitting state is reset
     }
-    // NO poner setSubmitting(false) aquí si es exitoso, para mantener el botón en loading durante la redirección
+    // DO NOT set setSubmitting(false) here if successful, to keep the button loading during redirection
   };
 
   const countryOptions = countries.map(country => ({
@@ -127,9 +129,9 @@ const CreateUserComponent = ({ openNotification }) => {
                 name="password"
                 rules={[
                   { required: true, message: "Please enter your password!" },
-                  { min: 8, message: "Password must be at least 8 characters" }
+                  { min: 4, message: "Password must be at least 4 characters" }
                 ]}
-                extra={<Text type="secondary" style={{ fontSize: '12px' }}>Must be at least 8 characters.</Text>}
+                extra={<Text type="secondary" style={{ fontSize: '12px' }}>Must be at least 4 characters.</Text>}
               >
                 <Input.Password 
                   prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -172,12 +174,13 @@ const CreateUserComponent = ({ openNotification }) => {
                     label={<Text strong>Document Type</Text>}
                     name="documentIdentity"
                   >
-                    <Select
-                      placeholder="Select document type"
-                      size="default"
-                      options={DOCUMENT_TYPES}
-                      suffixIcon={<IdcardOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                    />
+                    <Radio.Group className={styles.radioGroup}>
+                      {DOCUMENT_TYPES.map(type => (
+                        <Radio.Button key={type.value} value={type.value}>
+                          {type.label}
+                        </Radio.Button>
+                      ))}
+                    </Radio.Group>
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>

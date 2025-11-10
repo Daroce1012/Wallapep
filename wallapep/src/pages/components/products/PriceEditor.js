@@ -4,7 +4,7 @@ import styles from '../../../styles/ListMyProducts.module.css';
 
 const { Text } = Typography;
 
-const PriceEditor = ({ product, isEditing, editPrice, onEdit, onSave, onCancel, onChange }) => {
+const PriceEditor = ({ product, isEditing, editPrice, onEdit, onSave, onCancel, onChange, isProductSold }) => {
   if (isEditing) {
     return (
       <Space>
@@ -17,17 +17,20 @@ const PriceEditor = ({ product, isEditing, editPrice, onEdit, onSave, onCancel, 
           className={styles.priceInput}
           autoFocus
           onPressEnter={onSave}
+          disabled={isProductSold}
         />
         <Button 
           type="primary" 
           size="small" 
           icon={<CheckOutlined />}
           onClick={onSave}
+          disabled={isProductSold}
         />
         <Button 
           size="small" 
           icon={<CloseOutlined />}
           onClick={onCancel}
+          disabled={isProductSold}
         />
       </Space>
     );
@@ -36,9 +39,9 @@ const PriceEditor = ({ product, isEditing, editPrice, onEdit, onSave, onCancel, 
   return (
     <Text 
       strong 
-      className={`${styles.priceText} ${styles.clickablePrice}`} 
-      onClick={onEdit}
-      title="Click to edit"
+      className={`${styles.priceText} ${isProductSold ? '' : styles.priceLink}`} 
+      onClick={isProductSold ? null : onEdit}
+      title={isProductSold ? "Cannot edit price for a sold product" : "Click to edit"}
     >
       € {product.price}
     </Text>

@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import EditProductFormComponent from "../components/products/EditProductFormComponent";
 
-export default function EditProductPage() {
+export default function EditProductPage({ openNotification }) {
   const router = useRouter();
   const { id } = router.query; 
 
@@ -12,7 +12,7 @@ export default function EditProductPage() {
   return (
     <div>
       <h1>Editar producto {id}</h1>
-      <EditProductFormComponent id = {id} />
+      <EditProductFormComponent id = {id} openNotification={openNotification} />
     </div>
   );
 }

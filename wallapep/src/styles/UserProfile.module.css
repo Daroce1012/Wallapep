@@ -17,7 +17,10 @@
   height: 200px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 8px 8px 0 0;
-  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCkIv812LERa3nNohalzgOZbkdZeSv-TGZjLHIL_AEgCQulQ3X1EpOeZjBhPob2dg8AoXz-VZg_LlszVTqWPMaqx4ivuAzHjOk4-4jHQbho9LOLeezEvrgArUoAbQx6pgQn0gQZXgYOua6Zr97mU3DQgM7g0en8S-Ijy6eL1ImOWEvbjey5U8776uEfgTIPZp51TuP83Zve_3c_jBTOs3U8CLaGOvh19yeMqndtoPc2iniekQv0fIG1hi6wTON4MlmB6D5PPpOrMD6F")
+  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCkIv812LERa3nNohalzgOZbkdZeSv-TGZjLHIL_AEgCQulQ3X1EpOeZjBhPob2dg8AoXz-VZg_LlszVTqWPMaqx4ivuAzHjOk4-4jHQbho9LOLeezEvrgArUoAbQx6pgQn0gQZXgYOua6Zr97mU3DQgM7g0en8S-Ijy6eL1ImOWEvbjey5U8776uEfgTIPZp51TuP83Zve_3c_jBTOs3U8CLaGOvh19yeMqndtoPc2iniekQv0fIG1hi6wTON4MlmB6D5PPpOrMD6F");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 .profileCard {

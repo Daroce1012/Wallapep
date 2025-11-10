@@ -75,12 +75,12 @@ let LoginFormComponent = ({setLogin, openNotification}) => {
                                 { type: 'email', message: "Please enter a valid email!" }
                             ]}
                         >
-                            <Input placeholder="your email" />
+                            <Input placeholder="e.g. example@gmail.com" />
                         </Form.Item>
 
                         <Form.Item label="Password" name="password"
                             rules={[{ required: true, message: "Please enter your password!" }]}>
-                            <Input.Password placeholder="your password" />
+                            <Input.Password placeholder="e.g. 1234*aBc" />
                         </Form.Item>
 
                         <Form.Item>

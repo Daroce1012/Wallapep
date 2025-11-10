@@ -39,7 +39,6 @@ let EditProductFormComponent = ({id, openNotification}) => {
     }
 
     let clickEditProduct = async (values) => {
-        // Convertir el objeto dayjs de DatePicker de nuevo a timestamp (segundos)
         const productData = { ...values };
         if (productData.date) {
             productData.date = productData.date.unix(); 
@@ -47,10 +46,18 @@ let EditProductFormComponent = ({id, openNotification}) => {
 
         let result = await apiPut(`/products/${id}`, productData, {
             onError: (serverErrors) => {
-                let notificationMsg = serverErrors.map(e => e.msg).join(", ");
-                if (openNotification) {
-                    openNotification("top", notificationMsg, "error");
-                }
+                serverErrors.forEach(error => {
+                  if (error.path) {
+                    form.setFields([{
+                      name: error.path,
+                      errors: [error.msg]
+                    }]);
+                  } else {
+                     if (openNotification) {
+                        openNotification("top", error.msg, "error");
+                      }
+                  }
+                });
             }
         });
 
@@ -128,6 +135,7 @@ let EditProductFormComponent = ({id, openNotification}) => {
                                     <DatePicker 
                                         format="YYYY-MM-DD"
                                         style={{ width: '100%' }}
+                                        size="large"
                                     />
                                 </Form.Item>
                             </Col>

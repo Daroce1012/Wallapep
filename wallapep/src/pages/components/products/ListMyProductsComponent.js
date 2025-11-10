@@ -4,7 +4,7 @@ import { ShoppingOutlined, EditOutlined, DeleteOutlined, DollarOutlined } from '
 import Link from "next/link";
 import { timestampToString } from "../../../utils/UtilsDates";
 import { apiGet, apiDelete, apiPut, fetchProducts } from '../../../utils/UtilsApi';
-import StatisticsCard from '../common/StatisticsCard'; // Ruta corregida
+import StatisticsCard from '../common/StatisticsCard';
 import PriceEditor from './PriceEditor';
 import styles from '../../../styles/ListMyProducts.module.css';
 import CardHeader from '../common/CardHeader';
@@ -13,9 +13,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 
 const { Title } = Typography;
 
-// ============================================
-// COMPONENTE PRINCIPAL
-// ============================================
+const isProductSold = (product) => !!product.buyerId;
 
 const ListMyProductsComponent = () => {
   const [products, setProducts] = useState([]);
@@ -37,7 +35,6 @@ const ListMyProductsComponent = () => {
       if (data) {
         setProducts(data);
       } else {
-        // Considerar que `data` podría ser null si hay un error en la API pero la respuesta es 200
         setProductLoadError("Failed to retrieve products.");
       }
     } catch (error) {
@@ -47,10 +44,6 @@ const ListMyProductsComponent = () => {
       setLoading(false);
     }
   };
-
-  // ============================================
-  // HANDLERS
-  // ============================================
 
   const startEdit = (product) => {
     setEditingId(product.id);
@@ -93,35 +86,26 @@ const ListMyProductsComponent = () => {
       content: `Delete "${product.title}"? This cannot be undone.`,
       okText: 'Delete',
       okType: 'danger',
-      onOk: async () => {
+      onOk: async (close) => {
         const result = await apiDelete(`/products/${product.id}`, {
           onError: (serverErrors) => {
             const notificationMsg = serverErrors.map(e => e.msg).join(", ");
-            message.error(notificationMsg || "Failed to delete product");
+            const errorMessage = serverErrors.find(e => e.msg === "Somebody already bought the product")
+              ? "Cannot delete a product that has already been bought." 
+              : notificationMsg || "Failed to delete product";
+            message.error(errorMessage);
           }
         });
         if (result?.deleted) {
           message.success("Product deleted");
           setProducts(prev => prev.filter(p => p.id !== product.id));
         } else if (result !== null) {
-          // Si result no es null pero deleted es false, significa que la API respondió pero no se eliminó
-          message.error("Failed to delete product. Please try again.");
         }
       }
     });
   };
 
-  // ============================================
-  // CONFIGURACIÓN DE COLUMNAS
-  // ============================================
-
   const columns = [
-    // {
-    //   title: "Id",
-    //   dataIndex: "id",
-    //   key: "id",
-    //   width: 80,
-    // },
     {
       title: "Title",
       dataIndex: "title",
@@ -167,6 +151,7 @@ const ListMyProductsComponent = () => {
           onSave={() => savePrice(product)}
           onCancel={cancelEdit}
           onChange={setEditPrice}
+          isProductSold={isProductSold(product)}
         />
       )
     },
@@ -178,9 +163,9 @@ const ListMyProductsComponent = () => {
         { text: 'Available', value: false },
         { text: 'Sold', value: true },
       ],
-      onFilter: (value, record) => !!record.buyerId === value,
+      onFilter: (value, record) => isProductSold(record) === value,
       render: (_, record) => (
-        record.buyerId 
+        isProductSold(record) 
           ? <Tag color="red" className={styles.tagStatus}>Sold</Tag>
           : <Tag color="green" className={styles.tagStatus}>Available</Tag>
       )
@@ -208,20 +193,31 @@ const ListMyProductsComponent = () => {
       title: "Actions",
       key: "actions",
       width: 100,
-      render: (_, product) => (
-        <Space size="small">
-          <Link href={`/editProduct/${product.id}`}>
-            <Button type="link" size="small" icon={<EditOutlined />} />
-          </Link>
-          <Button 
-            type="link" 
-            size="small" 
-            danger 
-            icon={<DeleteOutlined />}
-            onClick={() => deleteProduct(product)}
-          />
-        </Space>
-      )
+      render: (_, product) => {
+        const sold = isProductSold(product);
+        return (
+          <Space size="small">
+            <Link href={`/editProduct/${product.id}`}>
+              <Button 
+                type="link" 
+                size="small" 
+                icon={<EditOutlined />} 
+                title="Edit product"
+                disabled={sold}
+              />
+            </Link>
+            <Button 
+              type="link" 
+              size="small" 
+              danger 
+              icon={<DeleteOutlined />}
+              onClick={() => deleteProduct(product)}
+              disabled={sold}
+              title={sold ? "Cannot delete a sold product" : "Delete product"}
+            />
+          </Space>
+        );
+      },
     },
   ];
 
@@ -233,21 +229,17 @@ const ListMyProductsComponent = () => {
     },
     {
       title: "Sold",
-      value: products.filter(p => p.buyerId).length,
+      value: products.filter(p => isProductSold(p)).length,
       prefix: <DollarOutlined />,
       valueStyle: { color: '#cf1322' }
     },
     {
       title: "Available",
-      value: products.filter(p => !p.buyerId).length,
+      value: products.filter(p => !isProductSold(p)).length,
       prefix: <ShoppingOutlined />,
       valueStyle: { color: '#52c41a' }
     }
   ], [products]);
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   if (loading) {
     return <LoadingSpinner tip="Loading your products..." />;
@@ -283,7 +275,7 @@ const ListMyProductsComponent = () => {
       <StatisticsCard 
         stats={productStats}
         className={styles.statisticsRow}
-        loading={loading} // Pasar el estado de carga
+        loading={loading}
       />
 
       {products.length === 0 && !loading ? (

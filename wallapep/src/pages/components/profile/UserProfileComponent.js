@@ -10,53 +10,29 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import EmptyState from '../common/EmptyState';
 import UserInfoItem from '../common/UserInfoItem';
 import StarRating from '../common/StarRating';
-
 const { Title, Text, Paragraph } = Typography;
-
 const STATS_CONFIG = {
-
   sales: {
-
     title: "Total Sales",
-
     icon: <ShoppingOutlined />,
-
     color: '#52c41a'
-
   },
-
   purchases: {
-
     title: "Total Purchases",
-
     icon: <DollarOutlined />,
-
     color: '#1890ff'
-
   },
-
   products: {
-
     title: "Products for Sale",
-
     icon: <ShoppingOutlined />,
-
     color: '#faad14'
-
   },
-
   transactions: {
-
     title: "Total Transactions",
-
     icon: <StarOutlined />,
-
     color: '#722ed1'
-
   }
-
 };
-
 const UserProfileComponent = ({ userId }) => {
     let [user, setUser] = useState(null)
     let [transactionsCount, setTransactionsCount] = useState(0)
@@ -66,13 +42,11 @@ const UserProfileComponent = ({ userId }) => {
     let [loading, setLoading] = useState(true)
     let [userLoadError, setUserLoadError] = useState(null);
     let [activeTab, setActiveTab] = useState('products')
-
     useEffect(() => {
         if (userId) {
             loadUserData();
         }
     }, [userId])
-
     let loadUserData = async () => {
         setLoading(true);
         setUserLoadError(null); // Resetear error al cargar
@@ -81,7 +55,6 @@ const UserProfileComponent = ({ userId }) => {
                 fetchUserById(userId),
                 loadCounts()
             ]);
-
             if (userDataResult.status === 'fulfilled' && userDataResult.value) {
                 setUser(userDataResult.value);
             }
@@ -91,7 +64,6 @@ const UserProfileComponent = ({ userId }) => {
             } else if (!userDataResult.value) {
                 setUserLoadError("User profile not found.");
             }
-
             if (countsDataResult.status === 'fulfilled' && countsDataResult.value) {
                 const { transactionsCount, totalSales, totalPurchases, productsCount } = countsDataResult.value;
                 setTransactionsCount(transactionsCount);
@@ -101,7 +73,6 @@ const UserProfileComponent = ({ userId }) => {
             } else if (countsDataResult.status === 'rejected') {
                 console.error("Error loading user counts:", countsDataResult.reason);
             }
-
         } catch (error) {
             console.error("Unhandled error loading user data:", error);
             setUserLoadError("An unexpected error occurred.");
@@ -109,23 +80,19 @@ const UserProfileComponent = ({ userId }) => {
             setLoading(false);
         }
     }
-
     let loadCounts = async () => {
         return await fetchUserCounts(userId);
     };
-
   const stats = useMemo(() => ({
     sales: totalSales,
     purchases: totalPurchases,
     products: productsCount,
     transactions: transactionsCount,
   }), [totalSales, totalPurchases, productsCount, transactionsCount]);
-
   const userRating = useMemo(() => {
     if (stats.transactions === 0) return 0;
     return (stats.sales / stats.transactions) * 5; // Assuming a 5-star rating system
   }, [stats.sales, stats.transactions]);
-
   const tabItems = useMemo(() => [
     {
       key: 'products',
@@ -146,13 +113,11 @@ const UserProfileComponent = ({ userId }) => {
       children: <UserTransactionsComponent userId={userId} />
     }
   ], [userId, stats.products, stats.transactions]);
-
   if (loading) {
     return (
       <LoadingSpinner tip="Loading profile..." />
     );
   }
-
   if (userLoadError) {
     return (
       <Card>
@@ -173,7 +138,6 @@ const UserProfileComponent = ({ userId }) => {
       </Card>
     );
   }
-
   if (!user) {
     return (
       <Card>
@@ -185,7 +149,6 @@ const UserProfileComponent = ({ userId }) => {
       </Card>
     );
   }
-
   return (
     <div className={styles.profileContainer}>
       {/* Header Banner */}
@@ -205,12 +168,10 @@ const UserProfileComponent = ({ userId }) => {
                 src={user.profilePicture || "https://lh3.googleusercontent.com/aida-public/AB6AXuDEl3jC24KOsg42tW4MvPht7xSSFUvP2rD_EqlrR2HX0iQFvWLGT7PDqCuCfwNCBIWYQbacUM-ewJb8Ex0FlkOFn_rtinBvf_yqC1oVn0LjMZEg1O7sFtrtCvGfuEcFb6rBnXTPwxJ8ENlxA524bgv6qTbH2DM0WyBX4-aQlZ3Nbtm4y9ZfgG2nlS-tA6PHxD91C5mLRTF4Nm3G2qZAocR8iCfiPN09kVqp9pg9-aymE_Qd6vrRr4I60ag6P4stg3Jgi8Pngfz0g8GE"}
                 className={styles.profileAvatar}
               />
-              
               <div className={styles.userDetailsContainer}>
                 <Title level={2} className={styles.userNameTitle}>
                   {user.name || 'User'}
                 </Title>
-                
                 <Paragraph className={styles.userDescriptionParagraph} type="secondary">
                   {user.description || 'Handcrafted goods for the modern home'}
                 </Paragraph>
@@ -287,8 +248,6 @@ const UserProfileComponent = ({ userId }) => {
       </Card>
     </div>
   );
-
-}
-
+};
 export default UserProfileComponent;
 

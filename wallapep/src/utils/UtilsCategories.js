@@ -1,13 +1,16 @@
 export const categoryLabels = {
-  'todos': { label: 'All', emoji: '🛍️' },
-  'fashion': { label: 'Fashion', emoji: '👕' },
-  'technology': { label: 'Technology', emoji: '📱' },
-  'home': { label: 'Home', emoji: '🏠' },
-  'sports': { label: 'Sports', emoji: '🚴' },
-  'kids': { label: 'Kids', emoji: '👶' },
-  'consola': { label: 'Console', emoji: '🎮' },
-  'planta': { label: 'Plant', emoji: '🌿' },
+  'todos':           { label: 'All', emoji: '🛍️' },
+  'Electronics':   { label: 'Technology',            emoji: '📱' },
+  'Home':          { label: 'Furniture & Home',      emoji: '🏠' },
+  'Fashion':       { label: 'Fashion & Accessories', emoji: '👗' },
+  'Books&Music':   { label: 'Books & Music',         emoji: '📚🎵' },
+  'Sports':        { label: 'Sports & Leisure',      emoji: '⚽️' },
+  'Motor':         { label: 'Motor',                 emoji: '🚗' },
+  'Toys':          { label: 'Toys',                  emoji: '🧸' },
 };
+
+
+
 
 export const getCategoriesForSelect = () => {
     // Excluir la categoría 'todos' que es solo para filtros generales

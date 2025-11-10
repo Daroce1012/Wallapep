@@ -6,6 +6,7 @@ import ProductCard from '../common/ProductCard'; // Importar ProductCard
 import styles from '../../../styles/UserProducts.module.css';
 import LoadingSpinner from '../common/LoadingSpinner';
 import EmptyState from '../common/EmptyState';
+import { processProductsImages } from '../../../utils/UtilsProducts'; // Importar processProductsImages
 
 let UserProductsComponent = ({userId}) => {
     let [products, setProducts] = useState([])
@@ -24,7 +25,8 @@ let UserProductsComponent = ({userId}) => {
         try {
             let jsonData = await fetchProducts(userId);
             if (jsonData) {
-                setProducts(jsonData);
+                const productsWithImages = await processProductsImages(jsonData); // Procesar imágenes
+                setProducts(productsWithImages);
             } else {
                 setProductLoadError("Failed to retrieve products for this user.");
             }
@@ -65,8 +67,8 @@ let UserProductsComponent = ({userId}) => {
     return (
         <Row gutter={[16, 16]}>
             {products.map(product => (
-                <Col key={product.id} xs={24} sm={12} md={8} lg={6}>
-                    <ProductCard product={product} variant="detailed" showDescription={true} />
+                <Col key={product.id} xs={24} sm={12} md={8} lg={4} xl={4}>
+                    <ProductCard product={product} variant="detailed" showDescription={false} />
                 </Col>
             ))}
         </Row>

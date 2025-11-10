@@ -7,7 +7,7 @@ const StarRating = ({ rating, totalReviews, starSize = 16, style = {} }) => {
   const emptyStars = 5 - fullStars;
 
   return (
-    <Space style={{ display: 'flex', color: '#faad14', ...style }}>
+    <Space style={{ ...style, color: '#faad14'  }}>
       {[...Array(fullStars)].map((_, i) => (
         <StarOutlined key={`full-${i}`} style={{ fontSize: starSize }} />
       ))}

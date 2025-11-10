@@ -200,7 +200,7 @@ const CreateProductComponent = ({ openNotification }) => {
                       max={1000000}
                       className={styles.priceInput}
                       size="large"
-                      placeholder="0.00"
+                      placeholder="10.00"
                       formatter={value => value ? `€ ${value}` : ''}
                       parser={value => value.replace(/€\s?/g, '')}
                       style={{ width: '100%' }}
